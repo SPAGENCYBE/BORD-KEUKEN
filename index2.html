@@ -113,6 +113,9 @@
     .mini-text{font-size:12px;font-weight:700;line-height:1.25;}
     .shopping-category{margin:8px 2px 2px;color:rgba(255,255,255,0.52);font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:950;}
     .shopping-category:first-child{margin-top:0;}
+    .shopping-item{grid-template-columns:24px 1fr;cursor:pointer;}
+    .shopping-item.done{opacity:.58;}
+    .shopping-item.done .mini-text{text-decoration:line-through;}
     .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
     .delete{width:20px;height:20px;border:0;border-radius:7px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:14px;cursor:pointer;}
     .notes{flex:1;resize:none;min-height:0;line-height:1.5;font-weight:700;}
@@ -355,7 +358,8 @@
         color:rgba(255,255,255,0.62);
       }
 
-      .meal-row{
+      .meal-row,
+      .shopping-item{
         display:grid;
         grid-template-columns:34px 1fr;
         gap:8px;
@@ -365,6 +369,18 @@
         background:linear-gradient(180deg,rgba(255,255,255,0.075),rgba(255,255,255,0.035));
         border:1px solid rgba(255,255,255,0.075);
         box-shadow:0 10px 24px rgba(0,0,0,0.16);
+      }
+
+      .shopping-item{
+        grid-template-columns:26px 1fr;
+      }
+
+      .shopping-item.done{
+        opacity:.58;
+      }
+
+      .shopping-item.done .mini-text{
+        text-decoration:line-through;
       }
 
       .meal-day{
@@ -865,29 +881,60 @@
     }
 
     function renderGroupedShopping(){
-      const groups={};
+      const activeGroups={};
+      const doneItems=[];
+
       state.shopping.forEach((item,index)=>{
+        if(item.done){
+          doneItems.push({...item,index});
+          return;
+        }
         const category=getShoppingCategory(item.text);
-        if(!groups[category])groups[category]=[];
-        groups[category].push({...item,index});
+        if(!activeGroups[category])activeGroups[category]=[];
+        activeGroups[category].push({...item,index});
       });
 
       const categoryOrder=["Groenten & fruit","Brood & ontbijt","Charcuterie & kaas","Zuivel","Vlees & vis","Diepvries","Droge voeding","Dranken","Snoep & snacks","Huishouden","Verzorging","Andere"];
 
-      return categoryOrder
-        .filter(category=>groups[category]?.length)
+      const activeHtml=categoryOrder
+        .filter(category=>activeGroups[category]?.length)
         .map(category=>{
-          const items=groups[category]
-            .sort((a,b)=>Number(a.done)-Number(b.done)||String(a.text).localeCompare(String(b.text),"nl-BE"))
-            .map(item=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('shopping',${item.index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('shopping',${item.index})">×</button></div>`)
+          const items=activeGroups[category]
+            .sort((a,b)=>String(a.text).localeCompare(String(b.text),"nl-BE"))
+            .map(item=>renderShoppingItem(item))
             .join("");
           return `<div class="shopping-category">${escapeHtml(category)}</div>${items}`;
         })
         .join("");
+
+      const doneHtml=doneItems.length
+        ? `<div class="shopping-category">Genomen · tik opnieuw om te verwijderen</div>${doneItems
+            .sort((a,b)=>String(a.text).localeCompare(String(b.text),"nl-BE"))
+            .map(item=>renderShoppingItem(item))
+            .join("")}`
+        : "";
+
+      return activeHtml + doneHtml;
+    }
+
+    function renderShoppingItem(item){
+      return `<div class="mini-item shopping-item ${item.done?"done":""}" onclick="handleShoppingItemClick(${item.index})"><button class="check" onclick="event.stopPropagation();handleShoppingItemClick(${item.index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div></div>`;
+    }
+
+    function handleShoppingItemClick(index){
+      if(!state.shopping[index])return;
+      if(state.shopping[index].done){
+        state.shopping.splice(index,1);
+      }else{
+        state.shopping[index].done=true;
+      }
+      saveState();
+      renderList("shopping");
+      syncCloudCollection("shopping");
     }
 
     function getShoppingCategory(text){
-      const t=String(text||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      const t=String(text||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
       const words=t.split(/[^a-z0-9]+/).filter(Boolean);
       const wordSet=new Set(words);
       const phrase=(phrases)=>phrases.some(p=>t.includes(p));

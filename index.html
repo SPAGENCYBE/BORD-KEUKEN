@@ -113,7 +113,8 @@
     .mini-text{font-size:12px;font-weight:700;line-height:1.25;}
     .shopping-category{margin:8px 2px 2px;color:rgba(255,255,255,0.52);font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:950;}
     .shopping-category:first-child{margin-top:0;}
-    .shopping-item{grid-template-columns:24px 1fr;cursor:pointer;}
+    .shopping-item{grid-template-columns:38px 1fr;cursor:pointer;}
+    .shopping-state{font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:var(--muted);font-weight:950;text-align:left;}
     .shopping-item.done{opacity:.58;}
     .shopping-item.done .mini-text{text-decoration:line-through;}
     .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
@@ -372,7 +373,14 @@
       }
 
       .shopping-item{
-        grid-template-columns:26px 1fr;
+        grid-template-columns:34px 1fr;
+      }
+
+      .shopping-state{
+        font-size:10px;
+        letter-spacing:.14em;
+        font-weight:950;
+        color:rgba(255,255,255,0.58);
       }
 
       .shopping-item.done{
@@ -597,24 +605,20 @@
 
       firebaseDb.ref("shopping").on("value", snapshot=>{
         const data=snapshot.val();
-        if(data){
-          applyingCloudUpdate=true;
-          state.shopping=Array.isArray(data)?data:Object.values(data);
-          saveState();
-          renderList("shopping");
-          applyingCloudUpdate=false;
-        }else if(state.shopping.length){syncCloudCollection("shopping");}
+        applyingCloudUpdate=true;
+        state.shopping=data ? (Array.isArray(data)?data:Object.values(data)) : [];
+        saveState();
+        renderList("shopping");
+        applyingCloudUpdate=false;
       });
 
       firebaseDb.ref("tasks").on("value", snapshot=>{
         const data=snapshot.val();
-        if(data){
-          applyingCloudUpdate=true;
-          state.tasks=Array.isArray(data)?data:Object.values(data);
-          saveState();
-          renderList("tasks");
-          applyingCloudUpdate=false;
-        }else if(state.tasks.length){syncCloudCollection("tasks");}
+        applyingCloudUpdate=true;
+        state.tasks=data ? (Array.isArray(data)?data:Object.values(data)) : [];
+        saveState();
+        renderList("tasks");
+        applyingCloudUpdate=false;
       });
 
       firebaseDb.ref("weekMenu").on("value", snapshot=>{
@@ -637,7 +641,10 @@
 
     function syncCloudCollection(type){
       if(!cloudReady||!firebaseDb||applyingCloudUpdate)return;
-      firebaseDb.ref(type).set(state[type]||[]).catch(console.error);
+      const items=state[type]||[];
+      const ref=firebaseDb.ref(type);
+      const action=items.length ? ref.set(items) : ref.remove();
+      action.catch(console.error);
     }
 
     function syncCloudWeekMenu(){
@@ -914,11 +921,11 @@
             .join("")}`
         : "";
 
-      return activeHtml + doneHtml;
+      return activeHtml + doneHtml || `<div class="empty">Geen boodschappen</div>`;
     }
 
     function renderShoppingItem(item){
-      return `<div class="mini-item shopping-item ${item.done?"done":""}" onclick="handleShoppingItemClick(${item.index})"><button class="check" onclick="event.stopPropagation();handleShoppingItemClick(${item.index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div></div>`;
+      return `<div class="meal-row shopping-item ${item.done?"done":""}" onclick="handleShoppingItemClick(${item.index})"><div class="shopping-state">${item.done?"✓":""}</div><div class="mini-text">${escapeHtml(item.text)}</div></div>`;
     }
 
     function handleShoppingItemClick(index){
@@ -1030,6 +1037,8 @@
       console.assert(colorForTitle("Training Alexis") === "blue", "Alexis events moeten blauw zijn.");
       console.assert(getShoppingCategory("vuilzakken") === "Huishouden", "vuilzakken moet bij Huishouden staan.");
       console.assert(getShoppingCategory("ui") === "Groenten & fruit", "ui moet bij Groenten & fruit staan.");
+      const testList=[];
+      console.assert(testList.length === 0, "Lege boodschappenlijst moet toegelaten zijn.");
     }
 
     function init(){
