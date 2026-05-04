@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keuken Dashboard</title>
+
+  <!-- Google Calendar API libraries -->
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+  <style>
+    :root {
+      --bg: #07090f;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.13);
+      --border: rgba(255, 255, 255, 0.16);
+      --text: #f5f7fb;
+      --muted: #aab1c5;
+      --accent: #7dd3fc;
+      --accent-2: #c084fc;
+      --success: #86efac;
+      --warning: #facc15;
+      --danger: #fb7185;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+      --radius: 28px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: radial-gradient(circle at top left, rgba(125, 211, 252, 0.24), transparent 34%),
+                  radial-gradient(circle at bottom right, rgba(192, 132, 252, 0.23), transparent 36%),
+                  var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, black, transparent 82%);
+    }
+
+    button, input, textarea { font: inherit; }
+
+    .app {
+      width: 100vw;
+      height: 100vh;
+      padding: clamp(16px, 2vw, 34px);
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 22px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1.1fr 1.6fr 0.8fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .glass {
+      background: linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.065));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 150px;
+    }
+
+    .time {
+      font-size: clamp(52px, 7vw, 108px);
+      line-height: 0.9;
+      font-weight: 850;
+      letter-spacing: -0.08em;
+    }
+
+    .date {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: clamp(18px, 1.8vw, 28px);
+      font-weight: 600;
+    }
+
+    .greeting {
+      padding: 24px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .greeting::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -80px;
+      top: -95px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(125,211,252,0.34), transparent 68%);
+    }
+
+    .greeting .eyebrow {
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+
+    .greeting h1 {
+      margin: 10px 0 8px;
+      font-size: clamp(28px, 3.2vw, 56px);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+      max-width: 780px;
+      z-index: 1;
+    }
+
+    .greeting p {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(16px, 1.35vw, 22px);
+      z-index: 1;
+    }
+
+    .weather-now {
+      padding: 24px 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .weather-icon { font-size: clamp(44px, 5vw, 74px); }
+    .weather-temp {
+      font-size: clamp(42px, 4.8vw, 74px);
+      line-height: 1;
+      font-weight: 850;
+      letter-spacing: -0.06em;
+    }
+    .weather-city { color: var(--muted); margin-top: 8px; font-weight: 650; }
+
+    .main {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 0.95fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 18px;
+      grid-template-areas:
+        "agenda tasks notes"
+        "agenda shopping photos";
+    }
+
+    .card {
+      padding: 22px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+
+    .card-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+      font-size: clamp(20px, 1.65vw, 30px);
+      letter-spacing: -0.03em;
+    }
+
+    .badge {
+      color: var(--text);
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.13);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .agenda { grid-area: agenda; }
+    .tasks { grid-area: tasks; }
+    .shopping { grid-area: shopping; }
+    .notes { grid-area: notes; }
+    .photos { grid-area: photos; }
+
+    .agenda-list, .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+      padding-right: 6px;
+      scrollbar-width: thin;
+    }
+
+    .agenda-item {
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.075);
+      border: 1px solid rgba(255,255,255,0.11);
+    }
+
+    .agenda-item.google {
+      background: linear-gradient(135deg, rgba(125,211,252,0.16), rgba(255,255,255,0.07));
+      border-color: rgba(125,211,252,0.24);
+    }
+
+    .agenda-time {
+      color: var(--accent);
+      font-size: 20px;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+    }
+
+    .agenda-name {
+      font-size: clamp(17px, 1.4vw, 24px);
+      font-weight: 780;
+      margin-bottom: 6px;
+    }
+
+    .agenda-meta {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .add-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+
+    .add-row input, .note-area, .settings-panel input, .settings-panel select {
+      width: 100%;
+      color: var(--text);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 18px;
+      padding: 15px 16px;
+      outline: none;
+    }
+
+    .add-row input::placeholder, .note-area::placeholder, .settings-panel input::placeholder {
+      color: rgba(255,255,255,0.45);
+    }
+
+    .btn {
+      color: #051018;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: 0;
+      border-radius: 18px;
+      padding: 0 18px;
+      font-weight: 900;
+      cursor: pointer;
+      min-width: 58px;
+      min-height: 52px;
+      box-shadow: 0 12px 34px rgba(125,211,252,0.23);
+    }
+
+    .btn.secondary {
+      color: var(--text);
+      background: rgba(255,255,255,0.11);
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: none;
+    }
+
+    .btn.danger {
+      color: #fff;
+      background: rgba(251,113,133,0.20);
+      border: 1px solid rgba(251,113,133,0.28);
+      box-shadow: none;
+    }
+
+    .calendar-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+
+    .calendar-actions .btn { min-height: 44px; padding: 0 14px; }
+
+    .item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 13px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.065);
+      border: 1px solid rgba(255,255,255,0.10);
+      user-select: none;
+    }
+
+    .check {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.06);
+      cursor: pointer;
+      font-weight: 900;
+      color: var(--success);
+    }
+
+    .item.done .item-text { text-decoration: line-through; color: rgba(255,255,255,0.42); }
+    .item-text { font-size: clamp(16px, 1.25vw, 21px); font-weight: 700; }
+
+    .delete {
+      border: 0;
+      color: rgba(255,255,255,0.65);
+      background: transparent;
+      font-size: 24px;
+      cursor: pointer;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+    }
+
+    .delete:hover { color: var(--danger); background: rgba(251,113,133,0.10); }
+
+    .note-area {
+      flex: 1;
+      min-height: 0;
+      resize: none;
+      font-size: clamp(17px, 1.35vw, 22px);
+      line-height: 1.45;
+    }
+
+    .photo-frame {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(125,211,252,0.20), rgba(192,132,252,0.17));
+      border: 1px solid rgba(255,255,255,0.12);
+      display: grid;
+      place-items: center;
+    }
+
+    .photo-frame img { width: 100%; height: 100%; object-fit: cover; display: none; }
+
+    .photo-placeholder {
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .photo-upload {
+      position: absolute;
+      inset: auto 16px 16px 16px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .file-label {
+      flex: 1;
+      text-align: center;
+      color: var(--text);
+      background: rgba(0,0,0,0.38);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 16px;
+      padding: 13px;
+      font-weight: 850;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+    }
+
+    .file-label input { display: none; }
+
+    .settings { position: fixed; right: 24px; bottom: 24px; z-index: 20; }
+
+    .settings-panel {
+      position: absolute;
+      right: 0;
+      bottom: 74px;
+      width: min(520px, calc(100vw - 48px));
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+      padding: 18px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .settings.open .settings-panel { display: flex; }
+
+    .settings-panel label {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .settings-help {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      background: rgba(0,0,0,0.20);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .floating-btn {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.13);
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    @media (max-width: 1050px) {
+      html, body { overflow: auto; }
+      .app { height: auto; min-height: 100vh; }
+      .topbar { grid-template-columns: 1fr; }
+      .main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        grid-template-areas: "agenda" "tasks" "shopping" "notes" "photos";
+      }
+      .card { min-height: 360px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="topbar">
+      <div class="hero glass">
+        <div id="time" class="time">--:--</div>
+        <div id="date" class="date">Laden...</div>
+      </div>
+
+      <div class="greeting glass">
+        <div class="eyebrow">Keuken Dashboard</div>
+        <h1 id="greetingTitle">Welkom thuis</h1>
+        <p id="dailyMessage">Alles wat belangrijk is vandaag, overzichtelijk op één scherm.</p>
+      </div>
+
+      <div class="weather-now glass">
+        <div>
+          <div id="weatherTemp" class="weather-temp">--°</div>
+          <div id="weatherCity" class="weather-city">Dendermonde</div>
+        </div>
+        <div id="weatherIcon" class="weather-icon">🌤️</div>
+      </div>
+    </section>
+
+    <section class="main">
+      <article class="agenda card glass">
+        <header class="card-header">
+          <h2 class="card-title">📅 Vandaag</h2>
+          <span class="badge" id="agendaCount">0 afspraken</span>
+        </header>
+
+        <div class="calendar-actions">
+          <button id="authorizeButton" class="btn" onclick="handleAuthClick()">Google verbinden</button>
+          <button id="refreshCalendarButton" class="btn secondary" onclick="loadGoogleCalendarEvents()">Vernieuwen</button>
+          <button id="signoutButton" class="btn danger" onclick="handleSignoutClick()">Uitloggen</button>
+        </div>
+
+        <div class="add-row">
+          <input id="agendaInput" placeholder="Handmatig bv. 18:00 Voetbal Alexis" />
+          <button class="btn" onclick="addAgendaItem()">+</button>
+        </div>
+        <div id="agendaList" class="agenda-list"></div>
+      </article>
+
+      <article class="tasks card glass">
+        <header class="card-header">
+          <h2 class="card-title">✅ Taken</h2>
+          <button class="btn secondary" onclick="clearDone('tasks')">Wis klaar</button>
+        </header>
+        <div class="add-row">
+          <input id="taskInput" placeholder="Nieuwe taak" />
+          <button class="btn" onclick="addItem('tasks')">+</button>
+        </div>
+        <div id="taskList" class="item-list"></div>
+      </article>
+
+      <article class="shopping card glass">
+        <header class="card-header">
+          <h2 class="card-title">🛒 Boodschappen</h2>
+          <button class="btn secondary" onclick="clearDone('shopping')">Wis klaar</button>
+        </header>
+        <div class="add-row">
+          <input id="shoppingInput" placeholder="Voeg item toe" />
+          <button class="btn" onclick="addItem('shopping')">+</button>
+        </div>
+        <div id="shoppingList" class="item-list"></div>
+      </article>
+
+      <article class="notes card glass">
+        <header class="card-header">
+          <h2 class="card-title">📝 Notities</h2>
+          <span class="badge">Auto-save</span>
+        </header>
+        <textarea id="notes" class="note-area" placeholder="Niet vergeten..."></textarea>
+      </article>
+
+      <article class="photos card glass">
+        <header class="card-header">
+          <h2 class="card-title">🖼️ Foto's</h2>
+          <span class="badge" id="photoCount">0 foto's</span>
+        </header>
+        <div class="photo-frame">
+          <img id="photoSlide" alt="Foto slider" />
+          <div id="photoPlaceholder" class="photo-placeholder">
+            Upload enkele foto's van je gezin, vakantie, projecten of herinneringen. Ze blijven lokaal in deze browser bewaard.
+          </div>
+          <div class="photo-upload">
+            <label class="file-label">
+              Foto's kiezen
+              <input id="photoInput" type="file" accept="image/*" multiple />
+            </label>
+            <button class="btn secondary" onclick="clearPhotos()">Wis</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="settings" class="settings">
+    <div class="settings-panel glass">
+      <label for="nameSetting">Naam op dashboard</label>
+      <input id="nameSetting" placeholder="Carlos" />
+
+      <label for="citySetting">Stad voor weer</label>
+      <input id="citySetting" placeholder="Dendermonde" />
+
+      <label for="googleApiKeySetting">Google API key</label>
+      <input id="googleApiKeySetting" placeholder="AIza..." />
+
+      <label for="googleClientIdSetting">Google OAuth Client ID</label>
+      <input id="googleClientIdSetting" placeholder="...apps.googleusercontent.com" />
+
+      <label for="calendarIdSetting">Calendar ID</label>
+      <input id="calendarIdSetting" placeholder="primary" />
+
+      <div class="settings-help">
+        Zet Calendar ID op <strong>primary</strong> voor je hoofdagenda. Voor een gedeelde gezinsagenda gebruik je het agenda-ID uit Google Calendar instellingen.
+      </div>
+
+      <button class="btn" onclick="saveSettings()">Opslaan</button>
+    </div>
+    <button class="floating-btn" onclick="toggleSettings()">⚙️</button>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "keuken-dashboard-v2-google-calendar";
+    const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+    const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
+    let photoIndex = 0;
+
+    const state = loadState();
+
+    function loadState() {
+      const defaults = {
+        name: "Carlos",
+        city: "Dendermonde",
+        googleApiKey: "",
+        googleClientId: "",
+        calendarId: "primary",
+        googleConnected: false,
+        googleEvents: [],
+        agenda: [
+          { time: "07:30", title: "Werk starten", meta: "Handmatig" },
+          { time: "12:00", title: "Middagpauze", meta: "Handmatig" },
+          { time: "18:00", title: "Gezinstijd", meta: "Handmatig" }
+        ],
+        tasks: [
+          { text: "Vuilnis controleren", done: false },
+          { text: "Schooltassen klaarzetten", done: false },
+          { text: "Planning morgen bekijken", done: false }
+        ],
+        shopping: [
+          { text: "Brood", done: false },
+          { text: "Fruit", done: false },
+          { text: "Melk", done: false }
+        ],
+        notes: "",
+        photos: []
+      };
+      try { return { ...defaults, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}) }; }
+      catch (e) { return defaults; }
+    }
+
+    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+    function gapiLoaded() {
+      gapi.load("client", initializeGapiClient);
+    }
+
+    async function initializeGapiClient() {
+      gapiInited = true;
+      maybeEnableGoogleButtons();
+    }
+
+    function gisLoaded() {
+      gisInited = true;
+      maybeEnableGoogleButtons();
+    }
+
+    async function maybeEnableGoogleButtons() {
+      const authorizeButton = document.getElementById("authorizeButton");
+      const refreshButton = document.getElementById("refreshCalendarButton");
+      const signoutButton = document.getElementById("signoutButton");
+      if (!authorizeButton || !refreshButton || !signoutButton) return;
+
+      refreshButton.style.display = "none";
+      signoutButton.style.display = "none";
+
+      if (!state.googleApiKey || !state.googleClientId) {
+        authorizeButton.textContent = "Google instellen ⚙️";
+        return;
+      }
+
+      if (!gapiInited || !gisInited) {
+        authorizeButton.textContent = "Google laden...";
+        return;
+      }
+
+      try {
+        await gapi.client.init({ apiKey: state.googleApiKey, discoveryDocs: [DISCOVERY_DOC] });
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: state.googleClientId,
+          scope: SCOPES,
+          callback: ""
+        });
+
+        authorizeButton.textContent = state.googleConnected ? "Google verbonden" : "Google verbinden";
+        refreshButton.style.display = state.googleConnected ? "inline-block" : "none";
+        signoutButton.style.display = state.googleConnected ? "inline-block" : "none";
+      } catch (error) {
+        authorizeButton.textContent = "Google fout";
+        console.error(error);
+      }
+    }
+
+    function handleAuthClick() {
+      if (!state.googleApiKey || !state.googleClientId) {
+        toggleSettings();
+        return;
+      }
+
+      if (!tokenClient) {
+        alert("Google is nog niet klaar. Controleer je API key en Client ID in instellingen.");
+        return;
+      }
+
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          console.error(resp);
+          alert("Google login is mislukt. Controleer je Google Cloud instellingen.");
+          return;
+        }
+        state.googleConnected = true;
+        saveState();
+        await loadGoogleCalendarEvents();
+        maybeEnableGoogleButtons();
+      };
+
+      const existingToken = gapi.client.getToken();
+      tokenClient.requestAccessToken({ prompt: existingToken ? "" : "consent" });
+    }
+
+    function handleSignoutClick() {
+      const token = gapi.client.getToken();
+      if (token !== null) {
+        google.accounts.oauth2.revoke(token.access_token);
+        gapi.client.setToken("");
+      }
+      state.googleConnected = false;
+      state.googleEvents = [];
+      saveState();
+      renderAgenda();
+      maybeEnableGoogleButtons();
+    }
+
+    async function loadGoogleCalendarEvents() {
+      if (!gapi.client || !gapi.client.calendar) return;
+
+      const start = new Date();
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+
+      try {
+        const response = await gapi.client.calendar.events.list({
+          calendarId: state.calendarId || "primary",
+          timeMin: start.toISOString(),
+          timeMax: end.toISOString(),
+          showDeleted: false,
+          singleEvents: true,
+          maxResults: 20,
+          orderBy: "startTime"
+        });
+
+        const events = response.result.items || [];
+        state.googleEvents = events.map(event => {
+          const startValue = event.start.dateTime || event.start.date;
+          const isAllDay = !event.start.dateTime;
+          const date = new Date(startValue);
+          return {
+            time: isAllDay ? "Hele dag" : date.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" }),
+            title: event.summary || "Geen titel",
+            meta: event.location ? `Google Calendar · ${event.location}` : "Google Calendar",
+            google: true
+          };
+        });
+
+        saveState();
+        renderAgenda();
+      } catch (error) {
+        console.error(error);
+        alert("Agenda kon niet geladen worden. Controleer je Google Cloud instellingen en Calendar ID.");
+      }
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("time").textContent = now.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" });
+      const date = now.toLocaleDateString("nl-BE", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+      document.getElementById("date").textContent = date.charAt(0).toUpperCase() + date.slice(1);
+
+      const hour = now.getHours();
+      let greeting = "Welkom thuis";
+      if (hour < 11) greeting = `Goedemorgen ${state.name}`;
+      else if (hour < 18) greeting = `Goedemiddag ${state.name}`;
+      else greeting = `Goedenavond ${state.name}`;
+      document.getElementById("greetingTitle").textContent = greeting;
+    }
+
+    async function updateWeather() {
+      document.getElementById("weatherCity").textContent = state.city;
+      const knownCities = {
+        "dendermonde": { lat: 51.03, lon: 4.10 },
+        "deiremonne": { lat: 51.03, lon: 4.10 },
+        "asse": { lat: 50.91, lon: 4.20 },
+        "antwerpen": { lat: 51.22, lon: 4.40 },
+        "brussel": { lat: 50.85, lon: 4.35 },
+        "gent": { lat: 51.05, lon: 3.72 }
+      };
+      const key = state.city.trim().toLowerCase();
+      const coords = knownCities[key] || knownCities["dendermonde"];
+
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,weather_code&timezone=Europe%2FBrussels`;
+        const res = await fetch(url);
+        const data = await res.json();
+        document.getElementById("weatherTemp").textContent = `${Math.round(data.current.temperature_2m)}°`;
+        document.getElementById("weatherIcon").textContent = weatherIcon(data.current.weather_code);
+      } catch (e) {
+        document.getElementById("weatherTemp").textContent = "--°";
+        document.getElementById("weatherIcon").textContent = "🌤️";
+      }
+    }
+
+    function weatherIcon(code) {
+      if ([0].includes(code)) return "☀️";
+      if ([1, 2].includes(code)) return "🌤️";
+      if ([3].includes(code)) return "☁️";
+      if ([45, 48].includes(code)) return "🌫️";
+      if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return "🌧️";
+      if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+      if ([95, 96, 99].includes(code)) return "⛈️";
+      return "🌤️";
+    }
+
+    function renderAgenda() {
+      const list = document.getElementById("agendaList");
+      const allEvents = [...state.googleEvents, ...state.agenda].sort((a, b) => String(a.time).localeCompare(String(b.time)));
+
+      if (!allEvents.length) {
+        list.innerHTML = `<div class="agenda-item"><div class="agenda-time">—</div><div><div class="agenda-name">Geen afspraken vandaag</div><div class="agenda-meta">Geniet van de rust.</div></div></div>`;
+      } else {
+        list.innerHTML = allEvents.map(item => `
+          <div class="agenda-item ${item.google ? "google" : ""}">
+            <div class="agenda-time">${escapeHtml(item.time)}</div>
+            <div>
+              <div class="agenda-name">${escapeHtml(item.title)}</div>
+              <div class="agenda-meta">${escapeHtml(item.meta || "")}</div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      const googleCount = state.googleEvents.length;
+      const manualCount = state.agenda.length;
+      document.getElementById("agendaCount").textContent = `${googleCount + manualCount} afspraak${googleCount + manualCount === 1 ? "" : "en"}`;
+    }
+
+    function addAgendaItem() {
+      const input = document.getElementById("agendaInput");
+      const value = input.value.trim();
+      if (!value) return;
+      const match = value.match(/^(\d{1,2}[:.]\d{2})\s+(.+)$/);
+      let time = "--:--";
+      let title = value;
+      if (match) {
+        time = match[1].replace(".", ":").padStart(5, "0");
+        title = match[2];
+      }
+      state.agenda.push({ time, title, meta: "Handmatig" });
+      input.value = "";
+      saveState();
+      renderAgenda();
+    }
+
+    function renderList(type) {
+      const list = document.getElementById(type === "tasks" ? "taskList" : "shoppingList");
+      list.innerHTML = state[type].map((item, index) => `
+        <div class="item ${item.done ? "done" : ""}">
+          <button class="check" onclick="toggleItem('${type}', ${index})">${item.done ? "✓" : ""}</button>
+          <div class="item-text">${escapeHtml(item.text)}</div>
+          <button class="delete" onclick="deleteItem('${type}', ${index})">×</button>
+        </div>
+      `).join("");
+    }
+
+    function addItem(type) {
+      const input = document.getElementById(type === "tasks" ? "taskInput" : "shoppingInput");
+      const text = input.value.trim();
+      if (!text) return;
+      state[type].push({ text, done: false });
+      input.value = "";
+      saveState();
+      renderList(type);
+    }
+
+    function toggleItem(type, index) { state[type][index].done = !state[type][index].done; saveState(); renderList(type); }
+    function deleteItem(type, index) { state[type].splice(index, 1); saveState(); renderList(type); }
+    function clearDone(type) { state[type] = state[type].filter(item => !item.done); saveState(); renderList(type); }
+
+    function setupNotes() {
+      const notes = document.getElementById("notes");
+      notes.value = state.notes || "";
+      notes.addEventListener("input", () => { state.notes = notes.value; saveState(); });
+    }
+
+    function setupPhotoUpload() {
+      const input = document.getElementById("photoInput");
+      input.addEventListener("change", async (event) => {
+        const files = [...event.target.files].slice(0, 8);
+        const photos = [];
+        for (const file of files) photos.push(await fileToDataUrl(file));
+        state.photos = photos;
+        photoIndex = 0;
+        saveState();
+        renderPhoto();
+      });
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderPhoto() {
+      const img = document.getElementById("photoSlide");
+      const placeholder = document.getElementById("photoPlaceholder");
+      document.getElementById("photoCount").textContent = `${state.photos.length} foto's`;
+      if (!state.photos.length) {
+        img.style.display = "none";
+        placeholder.style.display = "block";
+        return;
+      }
+      img.src = state.photos[photoIndex % state.photos.length];
+      img.style.display = "block";
+      placeholder.style.display = "none";
+    }
+
+    function nextPhoto() { if (state.photos.length) { photoIndex = (photoIndex + 1) % state.photos.length; renderPhoto(); } }
+    function clearPhotos() { state.photos = []; saveState(); renderPhoto(); }
+
+    function toggleSettings() { document.getElementById("settings").classList.toggle("open"); }
+
+    function saveSettings() {
+      state.name = document.getElementById("nameSetting").value.trim() || "Carlos";
+      state.city = document.getElementById("citySetting").value.trim() || "Dendermonde";
+      state.googleApiKey = document.getElementById("googleApiKeySetting").value.trim();
+      state.googleClientId = document.getElementById("googleClientIdSetting").value.trim();
+      state.calendarId = document.getElementById("calendarIdSetting").value.trim() || "primary";
+      state.googleConnected = false;
+      state.googleEvents = [];
+      saveState();
+      updateClock();
+      updateWeather();
+      renderAgenda();
+      maybeEnableGoogleButtons();
+      toggleSettings();
+    }
+
+    function setupSettings() {
+      document.getElementById("nameSetting").value = state.name;
+      document.getElementById("citySetting").value = state.city;
+      document.getElementById("googleApiKeySetting").value = state.googleApiKey;
+      document.getElementById("googleClientIdSetting").value = state.googleClientId;
+      document.getElementById("calendarIdSetting").value = state.calendarId || "primary";
+    }
+
+    function setupEnterKeys() {
+      document.getElementById("agendaInput").addEventListener("keydown", e => { if (e.key === "Enter") addAgendaItem(); });
+      document.getElementById("taskInput").addEventListener("keydown", e => { if (e.key === "Enter") addItem("tasks"); });
+      document.getElementById("shoppingInput").addEventListener("keydown", e => { if (e.key === "Enter") addItem("shopping"); });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function init() {
+      updateClock();
+      renderAgenda();
+      renderList("tasks");
+      renderList("shopping");
+      setupNotes();
+      setupSettings();
+      setupEnterKeys();
+      setupPhotoUpload();
+      renderPhoto();
+      updateWeather();
+      maybeEnableGoogleButtons();
+
+      setInterval(updateClock, 1000);
+      setInterval(updateWeather, 15 * 60 * 1000);
+      setInterval(nextPhoto, 9000);
+      setInterval(() => { if (state.googleConnected) loadGoogleCalendarEvents(); }, 10 * 60 * 1000);
+    }
+
+    init();
+  </script>
+</body>
+</html>
