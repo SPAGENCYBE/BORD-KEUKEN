@@ -98,11 +98,17 @@
 
     .settings{position:fixed;right:22px;bottom:22px;z-index:40;}
     .floating{width:56px;height:56px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.38);color:#fff;font-size:23px;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
-    .settings-panel{display:none;position:absolute;right:0;bottom:70px;width:min(560px,calc(100vw - 44px));max-height:calc(100vh - 110px);overflow:auto;background:rgba(7,13,21,0.92);border:1px solid rgba(255,255,255,0.14);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(20px);padding:18px;gap:12px;flex-direction:column;}
+    .settings-panel{display:none;position:absolute;right:0;bottom:70px;width:min(620px,calc(100vw - 44px));max-height:calc(100vh - 110px);overflow:auto;background:rgba(7,13,21,0.94);border:1px solid rgba(255,255,255,0.14);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(20px);padding:18px;gap:12px;flex-direction:column;}
     .settings.open .settings-panel{display:flex;}
     .settings-panel label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-top:4px;}
     .settings-help{color:rgba(255,255,255,0.68);font-size:13px;line-height:1.45;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:12px;}
     .settings-actions{display:flex;flex-wrap:wrap;gap:8px;}
+    .status{font-size:13px;font-weight:800;color:rgba(255,255,255,0.72);background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 12px;}
+    .calendar-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:auto;border-radius:16px;}
+    .calendar-row{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 12px;}
+    .calendar-row input{width:20px;height:20px;accent-color:#3ddc97;}
+    .calendar-name{font-weight:850;font-size:14px;}
+    .calendar-id{font-size:11px;color:rgba(255,255,255,0.48);margin-top:2px;word-break:break-all;}
 
     @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{grid-template-columns:repeat(2,1fr);}.bottom{grid-template-columns:repeat(2,1fr);}}
     @media (max-width:780px){.family-strip,.week-grid,.bottom{grid-template-columns:1fr;}.clock{font-size:64px;}}
@@ -158,27 +164,36 @@
       <input id="nameSetting" placeholder="Naam, bv. Carlos" />
       <input id="citySetting" placeholder="Stad voor weer, bv. Dendermonde" />
 
-      <label>Google Agenda koppelen</label>
-      <input id="googleApiKeySetting" placeholder="Google API key" />
-      <input id="googleClientIdSetting" placeholder="Google OAuth Client ID" />
-      <input id="calendarIdSetting" placeholder="Calendar ID, meestal: primary" />
+      <label>Google Agenda zoals DAKboard</label>
+      <div id="googleStatus" class="status">Google wordt geladen...</div>
+      <div class="settings-actions">
+        <button id="authorizeButton" class="btn" onclick="handleAuthClick()">Inloggen met Google</button>
+        <button id="loadCalendarsButton" class="btn secondary" onclick="loadCalendarList()">Agenda's ophalen</button>
+        <button id="refreshCalendarButton" class="btn secondary" onclick="loadSelectedCalendarEvents()">Vernieuwen</button>
+        <button id="signoutButton" class="btn danger" onclick="handleSignoutClick()">Uitloggen</button>
+      </div>
 
       <div class="settings-help">
-        Klik eerst op <strong>Opslaan</strong>. Klik daarna op <strong>Google verbinden</strong>. Gebruik bij Calendar ID meestal <strong>primary</strong>. Er wordt alleen leesrecht gevraagd voor je agenda.
+        Log in met je Google-account, haal je agenda's op en vink aan welke agenda's op het keukenbord mogen verschijnen. De technische API-key en Client ID zitten al in de code.
+      </div>
+
+      <label>Agenda's kiezen</label>
+      <div id="calendarList" class="calendar-list">
+        <div class="settings-help">Nog geen agenda's geladen.</div>
       </div>
 
       <div class="settings-actions">
         <button class="btn" onclick="saveSettings()">Opslaan</button>
-        <button id="authorizeButton" class="btn secondary" onclick="handleAuthClick()">Google verbinden</button>
-        <button id="refreshCalendarButton" class="btn secondary" onclick="loadGoogleCalendarEvents()">Agenda vernieuwen</button>
-        <button id="signoutButton" class="btn danger" onclick="handleSignoutClick()">Uitloggen</button>
+        <button class="btn secondary" onclick="saveSelectedCalendarsAndLoad()">Gekozen agenda's opslaan</button>
       </div>
     </div>
     <button class="floating" onclick="toggleSettings()">⚙️</button>
   </div>
 
   <script>
-    const STORAGE_KEY = "keuken-dashboard-clean-google-v1";
+    const STORAGE_KEY = "keuken-dashboard-dakboard-style-v1";
+    const GOOGLE_API_KEY = "AIzaSyBXqKfx3xqnu7Ppuazlr82RkVWP9ZuxGyM";
+    const GOOGLE_CLIENT_ID = "939573807224-iobd60ce6q60fu3cah2dg7oad0fi7oqf.apps.googleusercontent.com";
     const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
     const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 
@@ -208,10 +223,9 @@
       const defaults = {
         name:"Carlos",
         city:"Dendermonde",
-        googleApiKey:"",
-        googleClientId:"",
-        calendarId:"primary",
         googleConnected:false,
+        calendarList:[],
+        selectedCalendarIds:[],
         googleEvents:[],
         tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],
         shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],
@@ -223,90 +237,206 @@
     function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
 
     function gapiLoaded(){gapi.load("client",initializeGapiClient);}
-    async function initializeGapiClient(){gapiInited=true;maybeEnableGoogleButtons();}
+    async function initializeGapiClient(){
+      try{
+        await gapi.client.init({apiKey:GOOGLE_API_KEY,discoveryDocs:[DISCOVERY_DOC]});
+        gapiInited=true;
+        maybeEnableGoogleButtons();
+      }catch(error){
+        console.error(error);
+        setStatus("Google API kon niet starten. Controleer Google Cloud: API key restrictions en Calendar API.");
+      }
+    }
     function gisLoaded(){gisInited=true;maybeEnableGoogleButtons();}
 
-    async function maybeEnableGoogleButtons(){
+    function maybeEnableGoogleButtons(){
       const authorizeButton=document.getElementById("authorizeButton");
+      const loadButton=document.getElementById("loadCalendarsButton");
       const refreshButton=document.getElementById("refreshCalendarButton");
       const signoutButton=document.getElementById("signoutButton");
-      if(!authorizeButton||!refreshButton||!signoutButton)return;
+      if(!authorizeButton||!loadButton||!refreshButton||!signoutButton)return;
 
-      refreshButton.style.display="none";
-      signoutButton.style.display="none";
+      loadButton.style.display=state.googleConnected?"inline-block":"none";
+      refreshButton.style.display=state.googleConnected?"inline-block":"none";
+      signoutButton.style.display=state.googleConnected?"inline-block":"none";
 
-      if(!state.googleApiKey||!state.googleClientId){authorizeButton.textContent="Google gegevens invullen";return;}
-      if(!gapiInited||!gisInited){authorizeButton.textContent="Google laden...";return;}
-
-      try{
-        await gapi.client.init({apiKey:state.googleApiKey,discoveryDocs:[DISCOVERY_DOC]});
-        tokenClient=google.accounts.oauth2.initTokenClient({client_id:state.googleClientId,scope:SCOPES,callback:""});
-        authorizeButton.textContent=state.googleConnected?"Google verbonden":"Google verbinden";
-        refreshButton.style.display=state.googleConnected?"inline-block":"none";
-        signoutButton.style.display=state.googleConnected?"inline-block":"none";
-      }catch(error){
-        authorizeButton.textContent="Google fout";
-        console.error(error);
+      if(!gapiInited||!gisInited){
+        authorizeButton.textContent="Google laden...";
+        setStatus("Google wordt geladen...");
+        return;
       }
+
+      tokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:GOOGLE_CLIENT_ID,
+        scope:SCOPES,
+        callback:""
+      });
+
+      authorizeButton.textContent=state.googleConnected?"Google verbonden":"Inloggen met Google";
+      setStatus(state.googleConnected ? "Google is verbonden. Kies hieronder je agenda's." : "Klaar om in te loggen met Google.");
+      renderCalendarList();
     }
 
     function handleAuthClick(){
-      if(!state.googleApiKey||!state.googleClientId){toggleSettings(true);return;}
-      if(!tokenClient){alert("Google is nog niet klaar. Controleer API key, Client ID en je localhost/Live Server adres.");return;}
+      if(!gapiInited||!gisInited||!tokenClient){
+        alert("Google is nog niet klaar. Wacht enkele seconden en probeer opnieuw. Controleer ook of https://spagencybe.github.io bij Authorized JavaScript origins staat.");
+        return;
+      }
 
       tokenClient.callback=async(resp)=>{
-        if(resp.error!==undefined){console.error(resp);alert("Google login is mislukt. Controleer of je Gmail-adres als Test user is toegevoegd.");return;}
+        if(resp.error!==undefined){
+          console.error(resp);
+          alert("Google login is mislukt. Controleer of je Gmail-adres als Test user is toegevoegd en of de origin https://spagencybe.github.io juist staat.");
+          return;
+        }
         state.googleConnected=true;
         saveState();
-        await loadGoogleCalendarEvents();
         maybeEnableGoogleButtons();
+        await loadCalendarList();
       };
 
-      const existingToken=gapi.client.getToken();
-      tokenClient.requestAccessToken({prompt:existingToken?"":"consent"});
+      tokenClient.requestAccessToken({prompt:"consent"});
     }
 
     function handleSignoutClick(){
       const token=gapi.client.getToken();
       if(token!==null){google.accounts.oauth2.revoke(token.access_token);gapi.client.setToken("");}
       state.googleConnected=false;
+      state.calendarList=[];
+      state.selectedCalendarIds=[];
       state.googleEvents=[];
       saveState();
       renderAll();
+      renderCalendarList();
       maybeEnableGoogleButtons();
+      setStatus("Uitgelogd bij Google.");
     }
 
-    async function loadGoogleCalendarEvents(){
-      if(!gapi.client||!gapi.client.calendar)return;
-      const start=startOfDay(new Date());
-      const end=addDays(start,5);
+    async function loadCalendarList(){
+      if(!state.googleConnected){handleAuthClick();return;}
       try{
-        const response=await gapi.client.calendar.events.list({
-          calendarId:state.calendarId||"primary",
-          timeMin:start.toISOString(),
-          timeMax:end.toISOString(),
-          showDeleted:false,
-          singleEvents:true,
-          maxResults:80,
-          orderBy:"startTime"
-        });
-        const events=response.result.items||[];
-        state.googleEvents=events.map(event=>{
-          const startValue=event.start.dateTime||event.start.date;
-          const isAllDay=!event.start.dateTime;
-          const date=new Date(startValue);
-          return {
-            dateKey:toDateKey(date),
-            time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),
-            title:event.summary||"Geen titel",
-            person:event.location||"Google Calendar",
-            color:colorForTitle(event.summary||""),
-            google:true
-          };
-        });
+        setStatus("Agenda's ophalen...");
+        const response=await gapi.client.calendar.calendarList.list({minAccessRole:"reader", showHidden:false});
+        const calendars=response.result.items||[];
+        state.calendarList=calendars.map(cal=>({
+          id:cal.id,
+          summary:cal.summaryOverride||cal.summary||cal.id,
+          primary:!!cal.primary,
+          backgroundColor:cal.backgroundColor||"#5cc8ff"
+        }));
+
+        if(!state.selectedCalendarIds.length){
+          const primary=state.calendarList.find(c=>c.primary);
+          state.selectedCalendarIds=primary?[primary.id]:state.calendarList.slice(0,1).map(c=>c.id);
+        }
+
+        saveState();
+        renderCalendarList();
+        await loadSelectedCalendarEvents();
+        setStatus(`${state.calendarList.length} agenda's gevonden. Vink aan wat je wil tonen.`);
+      }catch(error){
+        console.error(error);
+        alert("Agenda's ophalen is mislukt. Controleer Google Cloud instellingen, Test user en Calendar API.");
+        setStatus("Agenda's ophalen mislukt.");
+      }
+    }
+
+    function renderCalendarList(){
+      const container=document.getElementById("calendarList");
+      if(!container)return;
+      if(!state.googleConnected){
+        container.innerHTML=`<div class="settings-help">Log eerst in met Google.</div>`;
+        return;
+      }
+      if(!state.calendarList.length){
+        container.innerHTML=`<div class="settings-help">Klik op <strong>Agenda's ophalen</strong> om je Google Agenda's te tonen.</div>`;
+        return;
+      }
+
+      container.innerHTML=state.calendarList.map(cal=>{
+        const checked=state.selectedCalendarIds.includes(cal.id)?"checked":"";
+        const label=cal.primary?`${escapeHtml(cal.summary)} · hoofdagenda`:escapeHtml(cal.summary);
+        return `
+          <label class="calendar-row">
+            <input type="checkbox" value="${escapeHtml(cal.id)}" ${checked} onchange="saveSelectedCalendarsFromUI()" />
+            <div>
+              <div class="calendar-name">${label}</div>
+              <div class="calendar-id">${escapeHtml(cal.id)}</div>
+            </div>
+          </label>
+        `;
+      }).join("");
+    }
+
+    function saveSelectedCalendarsFromUI(){
+      const checked=[...document.querySelectorAll('#calendarList input[type="checkbox"]:checked')].map(input=>input.value);
+      state.selectedCalendarIds=checked;
+      saveState();
+      setStatus(`${checked.length} agenda${checked.length===1?"":"'s"} geselecteerd.`);
+    }
+
+    async function saveSelectedCalendarsAndLoad(){
+      saveSettings(false);
+      saveSelectedCalendarsFromUI();
+      await loadSelectedCalendarEvents();
+    }
+
+    async function loadSelectedCalendarEvents(){
+      if(!state.googleConnected){return;}
+      if(!state.selectedCalendarIds.length){
+        state.googleEvents=[];
         saveState();
         renderAll();
-      }catch(error){console.error(error);alert("Agenda kon niet geladen worden. Controleer Calendar ID en Google Cloud instellingen.");}
+        setStatus("Geen agenda geselecteerd.");
+        return;
+      }
+
+      const start=startOfDay(new Date());
+      const end=addDays(start,5);
+      const all=[];
+
+      try{
+        setStatus("Afspraken laden...");
+        for(const calendarId of state.selectedCalendarIds){
+          const calendarMeta=state.calendarList.find(c=>c.id===calendarId);
+          const response=await gapi.client.calendar.events.list({
+            calendarId,
+            timeMin:start.toISOString(),
+            timeMax:end.toISOString(),
+            showDeleted:false,
+            singleEvents:true,
+            maxResults:40,
+            orderBy:"startTime"
+          });
+          const events=response.result.items||[];
+          all.push(...events.map(event=>{
+            const startValue=event.start.dateTime||event.start.date;
+            const isAllDay=!event.start.dateTime;
+            const date=new Date(startValue);
+            return {
+              dateKey:toDateKey(date),
+              time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),
+              title:event.summary||"Geen titel",
+              person:calendarMeta?.summary||"Google Calendar",
+              color:colorForTitle(`${event.summary||""} ${calendarMeta?.summary||""}`),
+              google:true
+            };
+          }));
+        }
+        state.googleEvents=all;
+        saveState();
+        renderAll();
+        setStatus(`${all.length} afspraak${all.length===1?"":"en"} geladen uit ${state.selectedCalendarIds.length} agenda${state.selectedCalendarIds.length===1?"":"'s"}.`);
+      }catch(error){
+        console.error(error);
+        alert("Afspraken laden is mislukt. Controleer of je toegang hebt tot de gekozen agenda's.");
+        setStatus("Afspraken laden mislukt.");
+      }
+    }
+
+    function setStatus(message){
+      const el=document.getElementById("googleStatus");
+      if(el)el.textContent=message;
     }
 
     function updateClock(){
@@ -351,7 +481,7 @@
 
     async function updateWeather(){
       document.getElementById("weatherCity").textContent=state.city;
-      const cities={"dendermonde":{lat:51.03,lon:4.10},"deiremonne":{lat:51.03,lon:4.10},"asse":{lat:50.91,lon:4.20},"antwerpen":{lat:51.22,lon:4.40},"brussel":{lat:50.85,lon:4.35},"gent":{lat:51.05,lon:3.72}};
+      const cities={"dendermonde":{lat:51.03,lon:4.10},"wieze":{lat:50.98,lon:4.10},"deiremonne":{lat:51.03,lon:4.10},"asse":{lat:50.91,lon:4.20},"antwerpen":{lat:51.22,lon:4.40},"brussel":{lat:50.85,lon:4.35},"gent":{lat:51.05,lon:3.72}};
       const coords=cities[state.city.trim().toLowerCase()]||cities.dendermonde;
       try{
         const url=`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max&timezone=Europe%2FBrussels`;
@@ -366,7 +496,7 @@
     }
 
     function weatherLabel(code){if([0].includes(code))return"Zonnig";if([1,2].includes(code))return"Licht bewolkt";if([3].includes(code))return"Bewolkt";if([45,48].includes(code))return"Mist";if([51,53,55,61,63,65,80,81,82].includes(code))return"Regen";if([71,73,75,77,85,86].includes(code))return"Sneeuw";if([95,96,99].includes(code))return"Onweer";return"Weer";}
-    function colorForTitle(title){const l=title.toLowerCase();if(l.includes("alexis"))return"blue";if(l.includes("amylia"))return"purple";if(l.includes("louize"))return"orange";if(l.includes("hannah"))return"green";if(l.includes("loïc")||l.includes("loic"))return"red";return"blue";}
+    function colorForTitle(title){const l=title.toLowerCase();if(l.includes("alexis"))return"blue";if(l.includes("amylia"))return"purple";if(l.includes("louize"))return"orange";if(l.includes("hannah"))return"green";if(l.includes("loïc")||l.includes("loic"))return"red";if(l.includes("werk"))return"blue";if(l.includes("school"))return"orange";return"green";}
 
     function renderList(type){const list=document.getElementById(type==="tasks"?"taskList":"shoppingList");list.innerHTML=state[type].map((item,index)=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('${type}',${index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('${type}',${index})">×</button></div>`).join("");}
     function addItem(type){const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");const text=input.value.trim();if(!text)return;state[type].push({text,done:false});input.value="";saveState();renderList(type);}
@@ -382,32 +512,31 @@
     function setupSettings(){
       document.getElementById("nameSetting").value=state.name;
       document.getElementById("citySetting").value=state.city;
-      document.getElementById("googleApiKeySetting").value=state.googleApiKey;
-      document.getElementById("googleClientIdSetting").value=state.googleClientId;
-      document.getElementById("calendarIdSetting").value=state.calendarId||"primary";
     }
 
-    function saveSettings(){
+    function saveSettings(closePanel=true){
       state.name=document.getElementById("nameSetting").value.trim()||"Carlos";
       state.city=document.getElementById("citySetting").value.trim()||"Dendermonde";
-      state.googleApiKey=document.getElementById("googleApiKeySetting").value.trim();
-      state.googleClientId=document.getElementById("googleClientIdSetting").value.trim();
-      state.calendarId=document.getElementById("calendarIdSetting").value.trim()||"primary";
-      state.googleConnected=false;
-      state.googleEvents=[];
       saveState();
       updateWeather();
       renderAll();
+      if(closePanel) setStatus("Instellingen opgeslagen.");
+    }
+
+    function toggleSettings(forceOpen){
+      const panel=document.getElementById("settings");
+      if(forceOpen===true)panel.classList.add("open");
+      else panel.classList.toggle("open");
+      renderCalendarList();
       maybeEnableGoogleButtons();
     }
 
-    function toggleSettings(forceOpen){document.getElementById("settings").classList.toggle("open",forceOpen===true?true:undefined);}
     function startOfDay(date){const d=new Date(date);d.setHours(0,0,0,0);return d;}
     function addDays(date,days){const d=new Date(date);d.setDate(d.getDate()+days);return d;}
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 
-    function init(){updateClock();setupInputs();setupSettings();renderAll();updateWeather();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(()=>{if(state.googleConnected)loadGoogleCalendarEvents();},10*60*1000);}
+    function init(){updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();updateWeather();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
     init();
   </script>
 </body>
