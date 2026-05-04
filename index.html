@@ -153,28 +153,213 @@
 
     @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{height:520px;grid-auto-columns:minmax(260px,48vw);}.bottom{grid-template-columns:repeat(2,1fr);}}
     @media (max-width:780px){
-      html,body{overflow:auto;background:#071019;}
-      body{background-image:linear-gradient(180deg,rgba(5,10,18,0.96),rgba(5,10,18,0.94)),url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');}
-      .app{height:auto;min-height:100vh;padding:14px;display:block;}
-      .top,.middle,.bottom .panel:nth-child(2),.bottom .panel:nth-child(4),.weather{display:none!important;}
-      .bottom{display:grid!important;grid-template-columns:1fr!important;gap:14px!important;}
-      .bottom .panel:first-child{display:flex!important;height:55vh;min-height:0;border-radius:18px;padding:14px;overflow:hidden;}
-      .bottom .panel:nth-child(3){display:flex!important;height:40vh;min-height:0;border-radius:18px;padding:14px;overflow:hidden;}
-      .bottom .panel:first-child .panel-title,.bottom .panel:nth-child(3) .panel-title{font-size:13px;margin-bottom:10px;}
-      .panel-top{grid-template-columns:1fr 44px;gap:8px;margin-bottom:10px;}
-      .panel input{font-size:15px;padding:11px 12px;border-radius:13px;}
-      .panel button{min-height:42px;border-radius:13px;font-size:18px;}
-      .mini-list,.weekmenu-list{gap:7px;overflow:auto;min-height:0;flex:1;scrollbar-width:none;-ms-overflow-style:none;}
-      .mini-item{padding:9px 10px;border-radius:12px;grid-template-columns:28px 1fr 28px;}
-      .check{width:27px;height:27px;border-radius:9px;font-size:14px;}
-      .mini-text{font-size:15px;}
-      .delete{width:27px;height:27px;border-radius:9px;font-size:18px;}
-      .settings{right:10px;bottom:10px;opacity:.16;transform:none;}
-      .floating{width:42px;height:42px;font-size:17px;}
-      .settings-panel{right:0;bottom:52px;width:calc(100vw - 20px);} 
-      .meal-row{grid-template-columns:34px 1fr;padding:7px 9px;border-radius:11px;}
-      .meal-day{font-size:10px;}
-      .meal-input{font-size:14px!important;}
+      html,body{
+        overflow:auto;
+        background:#071019;
+      }
+
+      body{
+        background-image:
+          linear-gradient(180deg,rgba(7,17,26,0.96),rgba(7,17,26,0.92)),
+          url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');
+        background-size:cover;
+        background-position:center;
+      }
+
+      .app{
+        min-height:100vh;
+        height:auto;
+        padding:14px;
+        display:block;
+      }
+
+      .top,
+      .middle,
+      .bottom .panel:nth-child(2),
+      .bottom .panel:nth-child(4),
+      .weather{
+        display:none!important;
+      }
+
+      .bottom{
+        display:flex!important;
+        flex-direction:column;
+        gap:14px!important;
+        min-height:0;
+        overflow:visible;
+      }
+
+      .bottom .panel:first-child,
+      .bottom .panel:nth-child(3){
+        display:flex!important;
+        min-height:0;
+        overflow:hidden;
+        border-radius:24px;
+        padding:14px;
+        border:1px solid rgba(255,255,255,0.10);
+        background:linear-gradient(180deg,rgba(255,255,255,0.09),rgba(255,255,255,0.04));
+        box-shadow:0 16px 40px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.05);
+        backdrop-filter:blur(16px);
+      }
+
+      .bottom .panel:first-child{
+        height:56vh;
+      }
+
+      .bottom .panel:nth-child(3){
+        height:32vh;
+      }
+
+      .bottom .panel:first-child .panel-title,
+      .bottom .panel:nth-child(3) .panel-title{
+        font-size:13px;
+        letter-spacing:.12em;
+        margin-bottom:10px;
+        color:rgba(255,255,255,0.78);
+      }
+
+      .bottom .panel:first-child .panel-title::before{
+        content:"🛒 ";
+      }
+
+      .bottom .panel:nth-child(3) .panel-title::before{
+        content:"🍽️ ";
+      }
+
+      .panel-top{
+        display:grid;
+        grid-template-columns:1fr 44px;
+        gap:8px;
+        margin-bottom:12px;
+      }
+
+      .panel input{
+        font-size:15px;
+        padding:12px 14px;
+        border-radius:16px;
+        border:1px solid rgba(255,255,255,0.10);
+        background:rgba(255,255,255,0.06);
+        color:#fff;
+        box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+      }
+
+      .panel input::placeholder{
+        color:rgba(255,255,255,0.38);
+      }
+
+      .panel button{
+        min-height:44px;
+        border-radius:16px;
+        font-size:18px;
+        font-weight:900;
+      }
+
+      .mini-list,
+      .weekmenu-list{
+        flex:1;
+        min-height:0;
+        overflow:auto;
+        gap:8px;
+        padding-right:0;
+        scrollbar-width:none;
+        -ms-overflow-style:none;
+      }
+
+      .mini-list::-webkit-scrollbar,
+      .weekmenu-list::-webkit-scrollbar{
+        display:none;
+      }
+
+      .mini-item{
+        display:grid;
+        grid-template-columns:30px 1fr 30px;
+        gap:10px;
+        align-items:center;
+        padding:11px 10px;
+        border-radius:16px;
+        background:rgba(0,0,0,0.18);
+        border:1px solid rgba(255,255,255,0.06);
+      }
+
+      .check{
+        width:28px;
+        height:28px;
+        border-radius:10px;
+        font-size:14px;
+        border:1px solid rgba(255,255,255,0.16);
+        background:rgba(255,255,255,0.06);
+      }
+
+      .mini-text{
+        font-size:15px;
+        font-weight:800;
+        line-height:1.35;
+      }
+
+      .delete{
+        width:28px;
+        height:28px;
+        border-radius:10px;
+        font-size:17px;
+        background:rgba(255,255,255,0.06);
+        color:rgba(255,255,255,0.65);
+      }
+
+      .meal-row{
+        display:grid;
+        grid-template-columns:40px 1fr;
+        gap:10px;
+        align-items:center;
+        padding:10px 11px;
+        border-radius:16px;
+        background:rgba(0,0,0,0.18);
+        border:1px solid rgba(255,255,255,0.06);
+      }
+
+      .meal-day{
+        font-size:10px;
+        letter-spacing:.10em;
+        font-weight:900;
+        color:rgba(255,255,255,0.60);
+      }
+
+      .meal-input{
+        font-size:15px!important;
+        font-weight:800;
+        color:#fff!important;
+      }
+
+      .meal-input::placeholder{
+        color:rgba(255,255,255,0.34);
+      }
+
+      .settings{
+        right:10px;
+        bottom:10px;
+        opacity:.10;
+        transform:none;
+      }
+
+      .settings:hover,
+      .settings:focus-within{
+        opacity:1;
+      }
+
+      .floating{
+        width:42px;
+        height:42px;
+        font-size:17px;
+        border-radius:999px;
+        background:rgba(0,0,0,0.42);
+        border:1px solid rgba(255,255,255,0.14);
+      }
+
+      .settings-panel{
+        right:0;
+        bottom:52px;
+        width:calc(100vw - 20px);
+        max-height:78vh;
+      }
     }
   </style>
 </head>
