@@ -7,6 +7,8 @@
 
   <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
   <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-database-compat.js"></script>
 
   <style>
     :root{
@@ -71,7 +73,7 @@
     .event-person{margin-top:4px;font-size:12px;color:var(--soft);font-weight:700;}
     .empty{color:var(--soft);font-size:14px;font-weight:700;padding-top:6px;}
 
-    .bottom{display:grid;grid-template-columns:1fr 1fr 1fr 220px;gap:14px;align-items:stretch;}
+    .bottom{display:grid;grid-template-columns:0.95fr 0.95fr 1.25fr 0.95fr 220px;gap:14px;align-items:stretch;}
     .panel,.weather{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;min-height:150px;}
     .panel-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:12px;}
     .panel-top{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px;}
@@ -88,6 +90,11 @@
     .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
     .delete{width:24px;height:24px;border:0;border-radius:8px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:16px;cursor:pointer;}
     .notes{flex:1;resize:none;min-height:0;line-height:1.5;font-weight:700;}
+    .weekmenu-list{display:flex;flex-direction:column;gap:7px;overflow:auto;min-height:0;}
+    .meal-row{display:grid;grid-template-columns:42px 1fr;gap:9px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:8px 10px;}
+    .meal-day{font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:var(--muted);font-weight:950;}
+    .meal-input{width:100%;border:0!important;background:transparent!important;color:#fff!important;padding:0!important;border-radius:0!important;font-size:14px;font-weight:800;outline:none;}
+    .meal-input::placeholder{color:rgba(255,255,255,0.34);}
 
     .weather{background:linear-gradient(160deg,rgba(48,200,116,0.95),rgba(20,132,98,0.92));justify-content:space-between;position:relative;overflow:hidden;}
     .weather::after{content:"";position:absolute;width:120px;height:120px;border-radius:999px;background:rgba(255,255,255,0.16);right:-30px;top:-35px;}
@@ -140,6 +147,11 @@
         <div class="panel-title">Taken</div>
         <div class="panel-top"><input id="taskInput" placeholder="Nieuwe taak" /><button onclick="addItem('tasks')">+</button></div>
         <div id="taskList" class="mini-list"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title">Weekmenu</div>
+        <div id="weekMenuList" class="weekmenu-list"></div>
       </article>
 
       <article class="panel">
@@ -197,6 +209,21 @@
     const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
     const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
 
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyD8ku05ZKUfi0QL3ZDn4xFg7SSenX_llmo",
+      authDomain: "board-keuken-adad7.firebaseapp.com",
+      databaseURL: "https://board-keuken-adad7-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "board-keuken-adad7",
+      storageBucket: "board-keuken-adad7.firebasestorage.app",
+      messagingSenderId: "478188018473",
+      appId: "1:478188018473:web:c114c359e9e4b5ab37f538",
+      measurementId: "G-12MJPKWLC9"
+    };
+
+    let firebaseDb = null;
+    let cloudReady = false;
+    let applyingCloudUpdate = false;
+
     let tokenClient;
     let gapiInited = false;
     let gisInited = false;
@@ -229,12 +256,91 @@
         googleEvents:[],
         tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],
         shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],
-        notes:"Weekmenu: spaghetti · kip met rijst · wraps · puree met vis · frietjes"
+        notes:"Niet vergeten: schoolbrief tekenen · vuilnis buitenzetten",
+        weekMenu:{
+          ma:"Spaghetti",
+          di:"Kip met rijst",
+          wo:"Wraps",
+          do:"Puree met vis",
+          vr:"Frietjes",
+          za:"Pizza / makkelijk",
+          zo:"Familie-eten"
+        }
       };
       try{return {...defaults,...(JSON.parse(localStorage.getItem(STORAGE_KEY))||{})};}catch(e){return defaults;}
     }
 
     function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+
+    function initFirebaseSync(){
+      try{
+        if(!window.firebase){
+          console.warn("Firebase SDK niet geladen.");
+          return;
+        }
+        if(!firebase.apps.length){
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        firebaseDb=firebase.database();
+        cloudReady=true;
+        startCloudListeners();
+      }catch(error){
+        console.error("Firebase fout:", error);
+      }
+    }
+
+    function startCloudListeners(){
+      if(!firebaseDb)return;
+
+      firebaseDb.ref("shopping").on("value", snapshot=>{
+        const data=snapshot.val();
+        if(data){
+          applyingCloudUpdate=true;
+          state.shopping=Array.isArray(data)?data:Object.values(data);
+          saveState();
+          renderList("shopping");
+          applyingCloudUpdate=false;
+        }else if(state.shopping.length){
+          syncCloudCollection("shopping");
+        }
+      });
+
+      firebaseDb.ref("tasks").on("value", snapshot=>{
+        const data=snapshot.val();
+        if(data){
+          applyingCloudUpdate=true;
+          state.tasks=Array.isArray(data)?data:Object.values(data);
+          saveState();
+          renderList("tasks");
+          applyingCloudUpdate=false;
+        }else if(state.tasks.length){
+          syncCloudCollection("tasks");
+        }
+      });
+
+      firebaseDb.ref("weekMenu").on("value", snapshot=>{
+        const data=snapshot.val();
+        if(data){
+          applyingCloudUpdate=true;
+          state.weekMenu=data;
+          saveState();
+          renderWeekMenu();
+          applyingCloudUpdate=false;
+        }else if(state.weekMenu){
+          syncCloudWeekMenu();
+        }
+      });
+    }
+
+    function syncCloudCollection(type){
+      if(!cloudReady||!firebaseDb||applyingCloudUpdate)return;
+      firebaseDb.ref(type).set(state[type]||[]).catch(console.error);
+    }
+
+    function syncCloudWeekMenu(){
+      if(!cloudReady||!firebaseDb||applyingCloudUpdate)return;
+      firebaseDb.ref("weekMenu").set(state.weekMenu||{}).catch(console.error);
+    }
 
     function gapiLoaded(){gapi.load("client",initializeGapiClient);}
     async function initializeGapiClient(){
@@ -446,7 +552,7 @@
       document.getElementById("subDateText").textContent=now.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});
     }
 
-    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");}
+    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();}
 
     function getAllEvents(){
       if(state.googleEvents&&state.googleEvents.length)return state.googleEvents;
@@ -499,9 +605,31 @@
     function colorForTitle(title){const l=title.toLowerCase();if(l.includes("alexis"))return"blue";if(l.includes("amylia"))return"purple";if(l.includes("louize"))return"orange";if(l.includes("hannah"))return"green";if(l.includes("loïc")||l.includes("loic"))return"red";if(l.includes("werk"))return"blue";if(l.includes("school"))return"orange";return"green";}
 
     function renderList(type){const list=document.getElementById(type==="tasks"?"taskList":"shoppingList");list.innerHTML=state[type].map((item,index)=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('${type}',${index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('${type}',${index})">×</button></div>`).join("");}
-    function addItem(type){const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");const text=input.value.trim();if(!text)return;state[type].push({text,done:false});input.value="";saveState();renderList(type);}
-    function toggleItem(type,index){state[type][index].done=!state[type][index].done;saveState();renderList(type);}
-    function deleteItem(type,index){state[type].splice(index,1);saveState();renderList(type);}
+
+    function renderWeekMenu(){
+      const container=document.getElementById("weekMenuList");
+      if(!container)return;
+      const days=[
+        ["ma","Ma"],["di","Di"],["wo","Wo"],["do","Do"],["vr","Vr"],["za","Za"],["zo","Zo"]
+      ];
+      if(!state.weekMenu){state.weekMenu={};}
+      container.innerHTML=days.map(([key,label])=>`
+        <div class="meal-row">
+          <div class="meal-day">${label}</div>
+          <input class="meal-input" value="${escapeHtml(state.weekMenu[key]||"")}" placeholder="Menu invullen" oninput="updateMeal('${key}', this.value)" />
+        </div>
+      `).join("");
+    }
+
+    function updateMeal(day,value){
+      if(!state.weekMenu)state.weekMenu={};
+      state.weekMenu[day]=value;
+      saveState();
+      syncCloudWeekMenu();
+    }
+    function addItem(type){const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");const text=input.value.trim();if(!text)return;state[type].push({text,done:false});input.value="";saveState();renderList(type);syncCloudCollection(type);}
+    function toggleItem(type,index){state[type][index].done=!state[type][index].done;saveState();renderList(type);syncCloudCollection(type);}
+    function deleteItem(type,index){state[type].splice(index,1);saveState();renderList(type);syncCloudCollection(type);}
 
     function setupInputs(){
       document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("tasks");});
@@ -536,7 +664,7 @@
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 
-    function init(){updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();updateWeather();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
+    function init(){updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
     init();
   </script>
 </body>
