@@ -64,9 +64,6 @@
     button,input,textarea{font:inherit;}
     button{cursor:pointer;}
 
-    .swipe-pages{width:100vw;height:100vh;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;}
-    .swipe-pages::-webkit-scrollbar{display:none;}
-    .page{min-width:100vw;height:100vh;scroll-snap-align:start;overflow:hidden;}
     .app{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr) 380px;gap:18px;backdrop-filter:blur(2px);}
     .top{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;}
     .family-strip{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;}
@@ -145,32 +142,6 @@
     .weather-condition{margin-top:2px;font-size:11px;color:rgba(255,255,255,0.82);font-weight:800;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
     .weather-mini{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,0.88);position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
 
-    .month-dashboard{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:18px;backdrop-filter:blur(2px);}
-    .month-top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;}
-    .month-title-block h1{font-size:42px;line-height:.95;font-weight:260;letter-spacing:-.06em;margin:0;}
-    .month-title-block p{margin-top:8px;color:var(--muted);font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
-    .month-nav{display:flex;gap:8px;align-items:center;}
-    .month-nav button{border:0;border-radius:14px;min-height:40px;padding:0 14px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.14);color:#fff;font-weight:900;}
-    .month-layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;}
-    .month-card,.general-card{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;min-height:0;overflow:hidden;}
-    .month-card{display:flex;flex-direction:column;}
-    .month-header{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;flex-shrink:0;}
-    .month-weekday{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:950;text-align:center;padding:6px 0;}
-    .month-grid{min-height:0;flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(82px,1fr);gap:8px;}
-    .month-day{border-radius:16px;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.075);padding:8px;overflow:hidden;display:flex;flex-direction:column;gap:5px;}
-    .month-day.outside{opacity:.28;}
-    .month-day.today{outline:2px solid rgba(92,200,255,.55);background:rgba(92,200,255,0.10);}
-    .month-day-number{font-size:13px;font-weight:950;color:rgba(255,255,255,.84);flex-shrink:0;}
-    .month-event{font-size:10px;line-height:1.18;font-weight:800;color:#fff;background:rgba(255,255,255,0.08);border-left:3px solid var(--green);border-radius:8px;padding:4px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .month-event.blue{border-left-color:var(--blue);}.month-event.green{border-left-color:var(--green);}.month-event.purple{border-left-color:var(--purple);}.month-event.orange{border-left-color:var(--orange);}.month-event.red{border-left-color:var(--red);}
-    .general-card{display:flex;flex-direction:column;gap:12px;}
-    .general-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:950;}
-    .general-list{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0;scrollbar-width:none;}
-    .general-list::-webkit-scrollbar{display:none;}
-    .general-item{background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:9px 10px;}
-    .general-item-time{font-size:11px;font-weight:950;color:var(--blue);margin-bottom:3px;}
-    .general-item-title{font-size:13px;font-weight:850;line-height:1.25;}
-    .general-item-meta{font-size:10px;color:var(--soft);font-weight:800;margin-top:3px;}
     .settings{position:fixed;right:22px;bottom:22px;z-index:40;opacity:0;transition:opacity .22s ease, transform .22s ease;transform:translateY(8px);}
     .settings:hover,.settings:focus-within{opacity:1;transform:translateY(0);}
     .floating{width:56px;height:56px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.38);color:#fff;font-size:23px;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
@@ -186,7 +157,7 @@
     .calendar-name{font-weight:850;font-size:14px;}
     .calendar-id{font-size:11px;color:rgba(255,255,255,0.48);margin-top:2px;word-break:break-all;}
 
-    @media (max-width:1350px){html,body{overflow:auto;}.swipe-pages{height:auto;min-height:100vh;}.page{height:auto;min-height:100vh;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{height:520px;grid-auto-columns:minmax(260px,48vw);}.bottom{grid-template-columns:repeat(2,1fr);}.month-layout{grid-template-columns:1fr;}.month-grid{grid-auto-rows:92px;}.general-card{min-height:320px;}}
+    @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{height:520px;grid-auto-columns:minmax(260px,48vw);}.bottom{grid-template-columns:repeat(2,1fr);}}
     @media (max-width:780px){
       html,body{
         overflow:auto;
@@ -477,9 +448,7 @@
   </style>
 </head>
 <body>
-  <div class="swipe-pages">
-    <section class="page">
-      <main class="app">
+  <main class="app">
     <section class="top">
       <div id="familyStrip" class="family-strip"></div>
       <div class="clock-box">
@@ -526,44 +495,6 @@
       </aside>
     </section>
   </main>
-    </section>
-
-    <section class="page month-page">
-      <main class="month-dashboard">
-        <header class="month-top">
-          <div class="month-title-block">
-            <h1>Algemeen</h1>
-            <p>Maandoverzicht gezin & planning</p>
-          </div>
-          <div class="month-nav">
-            <button onclick="changeMonth(-1)">‹</button>
-            <button id="monthLabel" onclick="goToCurrentMonth()">Maand</button>
-            <button onclick="changeMonth(1)">›</button>
-          </div>
-        </header>
-
-        <section class="month-layout">
-          <article class="month-card">
-            <div class="month-header">
-              <div class="month-weekday">Ma</div>
-              <div class="month-weekday">Di</div>
-              <div class="month-weekday">Wo</div>
-              <div class="month-weekday">Do</div>
-              <div class="month-weekday">Vr</div>
-              <div class="month-weekday">Za</div>
-              <div class="month-weekday">Zo</div>
-            </div>
-            <div id="monthGrid" class="month-grid"></div>
-          </article>
-
-          <aside class="general-card">
-            <div class="general-title">Komende afspraken</div>
-            <div id="monthUpcoming" class="general-list"></div>
-          </aside>
-        </section>
-      </main>
-    </section>
-  </div>
 
   <div id="settings" class="settings">
     <div class="settings-panel">
@@ -622,7 +553,6 @@
     let gapiInited = false;
     let gisInited = false;
     let weekMenuSyncTimer = null;
-    let monthViewDate = new Date();
 
     const state = loadState();
 
@@ -850,9 +780,8 @@
     async function loadSelectedCalendarEvents(){
       if(!state.googleConnected){return;}
       if(!state.selectedCalendarIds.length){state.googleEvents=[];saveState();renderAll();setStatus("Geen agenda geselecteerd.");return;}
-      const now=new Date();
-      const start=monthStart(now);
-      const end=addDays(monthStart(addMonths(now,2)),1);
+      const start=startOfDay(new Date());
+      const end=addDays(start,14);
       const all=[];
       try{
         setStatus("Afspraken laden...");
@@ -887,7 +816,7 @@
       document.getElementById("subDateText").textContent=now.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});
     }
 
-    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();}
+    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();}
 
     function getAllEvents(){
       if(state.googleEvents&&state.googleEvents.length)return state.googleEvents;
@@ -918,53 +847,6 @@
         const items=dayEvents.length?dayEvents.map(e=>`<div class="event ${e.color||"blue"}"><div class="event-time">${escapeHtml(e.time)}</div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-person">${escapeHtml(e.person||"")}</div></div>`).join(""):`<div class="empty">Geen afspraken</div>`;
         return `<article class="day-column"><div class="day-header"><div class="day-left"><div class="day-number">${num}</div><div class="day-name">${escapeHtml(name)}</div></div><div class="day-count">${dayEvents.length} items</div></div><div class="events">${items}</div></article>`;
       }).join("");
-    }
-
-    function renderMonthCalendar(){
-      const grid=document.getElementById("monthGrid");
-      const label=document.getElementById("monthLabel");
-      const upcoming=document.getElementById("monthUpcoming");
-      if(!grid||!label||!upcoming)return;
-
-      const view=monthStart(monthViewDate);
-      const today=startOfDay(new Date());
-      label.textContent=view.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});
-
-      const firstWeekday=(view.getDay()+6)%7;
-      const start=addDays(view,-firstWeekday);
-      const events=getAllEvents();
-
-      grid.innerHTML=Array.from({length:42},(_,i)=>{
-        const date=addDays(start,i);
-        const key=toDateKey(date);
-        const inMonth=date.getMonth()===view.getMonth();
-        const isToday=toDateKey(date)===toDateKey(today);
-        const dayEvents=events.filter(e=>e.dateKey===key).sort((a,b)=>String(a.time).localeCompare(String(b.time)));
-        const visible=dayEvents.slice(0,3).map(e=>`<div class="month-event ${e.color||"green"}">${escapeHtml(e.time)} · ${escapeHtml(e.title)}</div>`).join("");
-        const more=dayEvents.length>3?`<div class="month-event">+${dayEvents.length-3} meer</div>`:"";
-        return `<div class="month-day ${inMonth?"":"outside"} ${isToday?"today":""}"><div class="month-day-number">${date.getDate()}</div>${visible}${more}</div>`;
-      }).join("");
-
-      const upcomingEvents=events
-        .filter(e=>e.dateKey>=toDateKey(today))
-        .sort((a,b)=>String(a.dateKey+a.time).localeCompare(String(b.dateKey+b.time)))
-        .slice(0,18);
-
-      upcoming.innerHTML=upcomingEvents.length?upcomingEvents.map(e=>{
-        const date=new Date(e.dateKey+"T12:00:00");
-        const dateLabel=date.toLocaleDateString("nl-BE",{weekday:"short",day:"numeric",month:"short"});
-        return `<div class="general-item"><div class="general-item-time">${escapeHtml(dateLabel)} · ${escapeHtml(e.time)}</div><div class="general-item-title">${escapeHtml(e.title)}</div><div class="general-item-meta">${escapeHtml(e.person||"")}</div></div>`;
-      }).join(""):`<div class="empty">Geen komende afspraken</div>`;
-    }
-
-    function changeMonth(delta){
-      monthViewDate=addMonths(monthViewDate,delta);
-      renderMonthCalendar();
-    }
-
-    function goToCurrentMonth(){
-      monthViewDate=new Date();
-      renderMonthCalendar();
     }
 
     async function updateWeather(){
@@ -1141,8 +1023,6 @@
     }
 
     function startOfDay(date){const d=new Date(date);d.setHours(0,0,0,0);return d;}
-    function monthStart(date){const d=new Date(date);d.setDate(1);d.setHours(0,0,0,0);return d;}
-    function addMonths(date,months){const d=new Date(date);d.setMonth(d.getMonth()+months);return d;}
     function addDays(date,days){const d=new Date(date);d.setDate(d.getDate()+days);return d;}
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
