@@ -4,11 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keuken Dashboard</title>
+
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
   <style>
     :root{
       --bg-dark:#071019;
-      --panel:rgba(10,16,24,0.58);
-      --panel-soft:rgba(255,255,255,0.08);
       --border:rgba(255,255,255,0.12);
       --text:#ffffff;
       --muted:rgba(255,255,255,0.68);
@@ -20,473 +22,96 @@
       --red:#ff6b7d;
       --shadow:0 18px 50px rgba(0,0,0,0.28);
       --radius:24px;
-      --radius-sm:16px;
-      --font:Inter, "Segoe UI", Arial, sans-serif;
+      --font:Inter,"Segoe UI",Arial,sans-serif;
     }
 
-    *{
-      box-sizing:border-box;
-      margin:0;
-      padding:0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html,body{
-      width:100%;
-      height:100%;
-      font-family:var(--font);
-      color:var(--text);
-      background:#08111a;
-      overflow:hidden;
-    }
-
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{width:100%;height:100%;font-family:var(--font);color:var(--text);background:#08111a;overflow:hidden;}
     body{
       background-image:
-        linear-gradient(90deg, rgba(5,10,18,0.82) 0%, rgba(5,10,18,0.48) 42%, rgba(5,10,18,0.72) 100%),
-        linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.35)),
+        linear-gradient(90deg,rgba(5,10,18,0.82) 0%,rgba(5,10,18,0.48) 42%,rgba(5,10,18,0.72) 100%),
+        linear-gradient(180deg,rgba(0,0,0,0.15),rgba(0,0,0,0.35)),
         url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2200&q=80');
       background-size:cover;
       background-position:center;
     }
 
-    .app{
-      width:100%;
-      height:100%;
-      padding:22px;
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      gap:18px;
-      backdrop-filter: blur(2px);
-    }
+    button,input,textarea{font:inherit;}
+    button{cursor:pointer;}
 
-    .top{
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:18px;
-      align-items:start;
-    }
+    .app{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto 1fr auto;gap:18px;backdrop-filter:blur(2px);}
+    .top{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;}
+    .family-strip{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;}
+    .family-card{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.05));border:1px solid var(--border);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);backdrop-filter:blur(14px);min-height:78px;position:relative;overflow:hidden;}
+    .family-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent,var(--green));}
+    .family-name{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800;margin-bottom:8px;}
+    .family-next{font-size:14px;font-weight:700;line-height:1.35;color:#fff;}
 
-    .family-strip{
-      display:grid;
-      grid-template-columns:repeat(5, minmax(120px,1fr));
-      gap:12px;
-    }
+    .clock-box{min-width:210px;text-align:right;padding-right:4px;}
+    .clock{font-size:82px;font-weight:250;line-height:.88;letter-spacing:-0.08em;text-shadow:0 10px 30px rgba(0,0,0,0.25);}
+    .date{margin-top:10px;font-size:24px;font-weight:700;text-transform:capitalize;}
+    .subdate{margin-top:4px;font-size:14px;color:var(--muted);text-transform:capitalize;font-weight:700;}
 
-    .family-card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.05));
-      border:1px solid var(--border);
-      border-radius:18px;
-      padding:12px 14px;
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(14px);
-      min-height:78px;
-      position:relative;
-      overflow:hidden;
-    }
+    .middle{min-height:0;}
+    .week-grid{height:100%;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
+    .day-column{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;min-height:0;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
+    .day-header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.10);flex-shrink:0;}
+    .day-left{display:flex;align-items:baseline;gap:10px;}
+    .day-number{font-size:42px;line-height:.9;font-weight:250;letter-spacing:-0.08em;}
+    .day-name{font-size:16px;color:var(--muted);font-weight:800;text-transform:capitalize;}
+    .day-count{font-size:12px;color:var(--soft);font-weight:800;letter-spacing:.10em;text-transform:uppercase;}
 
-    .family-card::before{
-      content:"";
-      position:absolute;
-      left:0;
-      top:0;
-      bottom:0;
-      width:4px;
-      background:var(--accent, var(--green));
-    }
+    .events{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0;padding-right:2px;}
+    .events::-webkit-scrollbar{width:6px;}
+    .events::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:999px;}
+    .event{background:rgba(0,0,0,0.20);border-left:4px solid var(--blue);border-radius:14px;padding:10px 12px;}
+    .event.blue{border-left-color:var(--blue);}.event.green{border-left-color:var(--green);}.event.purple{border-left-color:var(--purple);}.event.orange{border-left-color:var(--orange);}.event.red{border-left-color:var(--red);}
+    .event-time{font-size:13px;font-weight:900;margin-bottom:4px;color:#fff;}
+    .event-title{font-size:15px;font-weight:800;line-height:1.25;}
+    .event-person{margin-top:4px;font-size:12px;color:var(--soft);font-weight:700;}
+    .empty{color:var(--soft);font-size:14px;font-weight:700;padding-top:6px;}
 
-    .family-name{
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      color:var(--muted);
-      font-weight:800;
-      margin-bottom:8px;
-    }
+    .bottom{display:grid;grid-template-columns:1fr 1fr 1fr 220px;gap:14px;align-items:stretch;}
+    .panel,.weather{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;min-height:150px;}
+    .panel-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:12px;}
+    .panel-top{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px;}
+    .panel input,.panel textarea,.settings-panel input{width:100%;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.18);color:#fff;border-radius:14px;padding:11px 12px;outline:none;font:inherit;}
+    .panel input::placeholder,.panel textarea::placeholder,.settings-panel input::placeholder{color:rgba(255,255,255,0.35);}
+    .panel button,.btn{border:0;border-radius:14px;min-width:42px;padding:0 14px;min-height:42px;background:linear-gradient(135deg,var(--blue),var(--green));color:#071019;font-weight:900;cursor:pointer;}
+    .btn.secondary{color:#fff;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.14);}
+    .btn.danger{color:#fff;background:rgba(255,107,125,0.18);border:1px solid rgba(255,107,125,0.24);}
 
-    .family-next{
-      font-size:14px;
-      font-weight:700;
-      line-height:1.35;
-      color:#fff;
-    }
+    .mini-list{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0;}
+    .mini-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:9px 10px;}
+    .check{width:24px;height:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);color:var(--green);display:grid;place-items:center;font-weight:900;cursor:pointer;font-size:13px;}
+    .mini-text{font-size:14px;font-weight:700;line-height:1.3;}
+    .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
+    .delete{width:24px;height:24px;border:0;border-radius:8px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:16px;cursor:pointer;}
+    .notes{flex:1;resize:none;min-height:0;line-height:1.5;font-weight:700;}
 
-    .clock-box{
-      min-width:210px;
-      text-align:right;
-      padding-right:4px;
-    }
+    .weather{background:linear-gradient(160deg,rgba(48,200,116,0.95),rgba(20,132,98,0.92));justify-content:space-between;position:relative;overflow:hidden;}
+    .weather::after{content:"";position:absolute;width:120px;height:120px;border-radius:999px;background:rgba(255,255,255,0.16);right:-30px;top:-35px;}
+    .weather-temp{font-size:62px;line-height:.9;font-weight:250;letter-spacing:-0.08em;position:relative;z-index:1;}
+    .weather-city{margin-top:8px;font-size:17px;font-weight:900;position:relative;z-index:1;}
+    .weather-condition{margin-top:3px;font-size:13px;color:rgba(255,255,255,0.76);font-weight:700;position:relative;z-index:1;}
+    .weather-mini{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.82);position:relative;z-index:1;}
 
-    .clock{
-      font-size:82px;
-      font-weight:250;
-      line-height:.88;
-      letter-spacing:-0.08em;
-      text-shadow:0 10px 30px rgba(0,0,0,0.25);
-    }
+    .settings{position:fixed;right:22px;bottom:22px;z-index:40;}
+    .floating{width:56px;height:56px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.38);color:#fff;font-size:23px;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
+    .settings-panel{display:none;position:absolute;right:0;bottom:70px;width:min(560px,calc(100vw - 44px));max-height:calc(100vh - 110px);overflow:auto;background:rgba(7,13,21,0.92);border:1px solid rgba(255,255,255,0.14);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(20px);padding:18px;gap:12px;flex-direction:column;}
+    .settings.open .settings-panel{display:flex;}
+    .settings-panel label{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-top:4px;}
+    .settings-help{color:rgba(255,255,255,0.68);font-size:13px;line-height:1.45;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:12px;}
+    .settings-actions{display:flex;flex-wrap:wrap;gap:8px;}
 
-    .date{
-      margin-top:10px;
-      font-size:24px;
-      font-weight:700;
-      text-transform:capitalize;
-    }
-
-    .subdate{
-      margin-top:4px;
-      font-size:14px;
-      color:var(--muted);
-      text-transform:capitalize;
-      font-weight:700;
-    }
-
-    .middle{
-      min-height:0;
-    }
-
-    .week-grid{
-      height:100%;
-      display:grid;
-      grid-template-columns:repeat(5, 1fr);
-      gap:14px;
-    }
-
-    .day-column{
-      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(16px);
-    }
-
-    .day-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:12px;
-      margin-bottom:14px;
-      padding-bottom:12px;
-      border-bottom:1px solid rgba(255,255,255,0.10);
-      flex-shrink:0;
-    }
-
-    .day-left{
-      display:flex;
-      align-items:baseline;
-      gap:10px;
-    }
-
-    .day-number{
-      font-size:42px;
-      line-height:.9;
-      font-weight:250;
-      letter-spacing:-0.08em;
-    }
-
-    .day-name{
-      font-size:16px;
-      color:var(--muted);
-      font-weight:800;
-      text-transform:capitalize;
-    }
-
-    .day-count{
-      font-size:12px;
-      color:var(--soft);
-      font-weight:800;
-      letter-spacing:.10em;
-      text-transform:uppercase;
-    }
-
-    .events{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      overflow:auto;
-      min-height:0;
-      padding-right:2px;
-    }
-
-    .events::-webkit-scrollbar{
-      width:6px;
-    }
-
-    .events::-webkit-scrollbar-thumb{
-      background:rgba(255,255,255,0.15);
-      border-radius:999px;
-    }
-
-    .event{
-      background:rgba(0,0,0,0.20);
-      border-left:4px solid var(--blue);
-      border-radius:14px;
-      padding:10px 12px;
-    }
-
-    .event.blue{border-left-color:var(--blue);}
-    .event.green{border-left-color:var(--green);}
-    .event.purple{border-left-color:var(--purple);}
-    .event.orange{border-left-color:var(--orange);}
-    .event.red{border-left-color:var(--red);}
-
-    .event-time{
-      font-size:13px;
-      font-weight:900;
-      margin-bottom:4px;
-      color:#fff;
-    }
-
-    .event-title{
-      font-size:15px;
-      font-weight:800;
-      line-height:1.25;
-    }
-
-    .event-person{
-      margin-top:4px;
-      font-size:12px;
-      color:var(--soft);
-      font-weight:700;
-    }
-
-    .empty{
-      color:var(--soft);
-      font-size:14px;
-      font-weight:700;
-      padding-top:6px;
-    }
-
-    .bottom{
-      display:grid;
-      grid-template-columns:1fr 1fr 1fr 220px;
-      gap:14px;
-      align-items:stretch;
-    }
-
-    .panel{
-      background:linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      backdrop-filter: blur(16px);
-      padding:16px;
-      display:flex;
-      flex-direction:column;
-      min-height:150px;
-    }
-
-    .panel-title{
-      font-size:12px;
-      text-transform:uppercase;
-      letter-spacing:.12em;
-      color:var(--muted);
-      font-weight:900;
-      margin-bottom:12px;
-    }
-
-    .panel-top{
-      display:grid;
-      grid-template-columns:1fr auto;
-      gap:8px;
-      margin-bottom:10px;
-    }
-
-    .panel input, .panel textarea{
-      width:100%;
-      border:1px solid rgba(255,255,255,0.10);
-      background:rgba(0,0,0,0.18);
-      color:#fff;
-      border-radius:14px;
-      padding:11px 12px;
-      outline:none;
-      font:inherit;
-    }
-
-    .panel input::placeholder, .panel textarea::placeholder{
-      color:rgba(255,255,255,0.35);
-    }
-
-    .panel button{
-      border:0;
-      border-radius:14px;
-      min-width:42px;
-      padding:0 14px;
-      background:linear-gradient(135deg, var(--blue), var(--green));
-      color:#071019;
-      font-weight:900;
-      cursor:pointer;
-    }
-
-    .mini-list{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      overflow:auto;
-      min-height:0;
-    }
-
-    .mini-item{
-      display:grid;
-      grid-template-columns:auto 1fr auto;
-      gap:10px;
-      align-items:center;
-      background:rgba(0,0,0,0.16);
-      border-radius:12px;
-      padding:9px 10px;
-    }
-
-    .check{
-      width:24px;
-      height:24px;
-      border-radius:8px;
-      border:1px solid rgba(255,255,255,0.18);
-      background:rgba(255,255,255,0.05);
-      color:var(--green);
-      display:grid;
-      place-items:center;
-      font-weight:900;
-      cursor:pointer;
-      font-size:13px;
-    }
-
-    .mini-text{
-      font-size:14px;
-      font-weight:700;
-      line-height:1.3;
-    }
-
-    .mini-item.done .mini-text{
-      opacity:.45;
-      text-decoration: line-through;
-    }
-
-    .delete{
-      width:24px;
-      height:24px;
-      border:0;
-      border-radius:8px;
-      background:rgba(255,255,255,0.05);
-      color:rgba(255,255,255,0.56);
-      font-size:16px;
-      cursor:pointer;
-    }
-
-    .notes{
-      flex:1;
-      resize:none;
-      min-height:0;
-      line-height:1.5;
-      font-weight:700;
-    }
-
-    .weather{
-      background:linear-gradient(160deg, rgba(48,200,116,0.95), rgba(20,132,98,0.92));
-      border:1px solid rgba(255,255,255,0.10);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:18px 16px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-      min-height:150px;
-      position:relative;
-      overflow:hidden;
-    }
-
-    .weather::after{
-      content:"";
-      position:absolute;
-      width:120px;
-      height:120px;
-      border-radius:999px;
-      background:rgba(255,255,255,0.16);
-      right:-30px;
-      top:-35px;
-    }
-
-    .weather-temp{
-      font-size:62px;
-      line-height:.9;
-      font-weight:250;
-      letter-spacing:-0.08em;
-      position:relative;
-      z-index:1;
-    }
-
-    .weather-city{
-      margin-top:8px;
-      font-size:17px;
-      font-weight:900;
-      position:relative;
-      z-index:1;
-    }
-
-    .weather-condition{
-      margin-top:3px;
-      font-size:13px;
-      color:rgba(255,255,255,0.76);
-      font-weight:700;
-      position:relative;
-      z-index:1;
-    }
-
-    .weather-mini{
-      margin-top:10px;
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      font-size:11px;
-      font-weight:800;
-      color:rgba(255,255,255,0.82);
-      position:relative;
-      z-index:1;
-    }
-
-    @media (max-width: 1350px){
-      html,body{
-        overflow:auto;
-      }
-      .app{
-        height:auto;
-        min-height:100%;
-      }
-      .top{
-        grid-template-columns:1fr;
-      }
-      .clock-box{
-        text-align:left;
-      }
-      .family-strip{
-        grid-template-columns:repeat(3, 1fr);
-      }
-      .week-grid{
-        grid-template-columns:repeat(2, 1fr);
-      }
-      .bottom{
-        grid-template-columns:repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 780px){
-      .family-strip,
-      .week-grid,
-      .bottom{
-        grid-template-columns:1fr;
-      }
-      .clock{
-        font-size:64px;
-      }
-    }
+    @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{grid-template-columns:repeat(2,1fr);}.bottom{grid-template-columns:repeat(2,1fr);}}
+    @media (max-width:780px){.family-strip,.week-grid,.bottom{grid-template-columns:1fr;}.clock{font-size:64px;}}
   </style>
 </head>
 <body>
   <main class="app">
     <section class="top">
       <div id="familyStrip" class="family-strip"></div>
-
       <div class="clock-box">
         <div id="clock" class="clock">--:--</div>
         <div id="dateText" class="date">laden...</div>
@@ -501,19 +126,13 @@
     <section class="bottom">
       <article class="panel">
         <div class="panel-title">Boodschappen</div>
-        <div class="panel-top">
-          <input id="shoppingInput" placeholder="Voeg item toe" />
-          <button onclick="addItem('shopping')">+</button>
-        </div>
+        <div class="panel-top"><input id="shoppingInput" placeholder="Voeg item toe" /><button onclick="addItem('shopping')">+</button></div>
         <div id="shoppingList" class="mini-list"></div>
       </article>
 
       <article class="panel">
         <div class="panel-title">Taken</div>
-        <div class="panel-top">
-          <input id="taskInput" placeholder="Nieuwe taak" />
-          <button onclick="addItem('tasks')">+</button>
-        </div>
+        <div class="panel-top"><input id="taskInput" placeholder="Nieuwe taak" /><button onclick="addItem('tasks')">+</button></div>
         <div id="taskList" class="mini-list"></div>
       </article>
 
@@ -524,223 +143,271 @@
 
       <aside class="weather">
         <div>
-          <div id="weatherTemp" class="weather-temp">21°</div>
+          <div id="weatherTemp" class="weather-temp">--°</div>
           <div id="weatherCity" class="weather-city">Dendermonde</div>
-          <div id="weatherCondition" class="weather-condition">Licht bewolkt</div>
+          <div id="weatherCondition" class="weather-condition">weer laden</div>
         </div>
-        <div id="weatherMini" class="weather-mini">
-          <span>wo 23°</span>
-          <span>do 19°</span>
-          <span>vr 22°</span>
-        </div>
+        <div id="weatherMini" class="weather-mini"><span>laden...</span></div>
       </aside>
     </section>
   </main>
 
+  <div id="settings" class="settings">
+    <div class="settings-panel">
+      <label>Basis</label>
+      <input id="nameSetting" placeholder="Naam, bv. Carlos" />
+      <input id="citySetting" placeholder="Stad voor weer, bv. Dendermonde" />
+
+      <label>Google Agenda koppelen</label>
+      <input id="googleApiKeySetting" placeholder="Google API key" />
+      <input id="googleClientIdSetting" placeholder="Google OAuth Client ID" />
+      <input id="calendarIdSetting" placeholder="Calendar ID, meestal: primary" />
+
+      <div class="settings-help">
+        Klik eerst op <strong>Opslaan</strong>. Klik daarna op <strong>Google verbinden</strong>. Gebruik bij Calendar ID meestal <strong>primary</strong>. Er wordt alleen leesrecht gevraagd voor je agenda.
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn" onclick="saveSettings()">Opslaan</button>
+        <button id="authorizeButton" class="btn secondary" onclick="handleAuthClick()">Google verbinden</button>
+        <button id="refreshCalendarButton" class="btn secondary" onclick="loadGoogleCalendarEvents()">Agenda vernieuwen</button>
+        <button id="signoutButton" class="btn danger" onclick="handleSignoutClick()">Uitloggen</button>
+      </div>
+    </div>
+    <button class="floating" onclick="toggleSettings()">⚙️</button>
+  </div>
+
   <script>
-    const STORAGE_KEY = "keuken-dashboard-clean-v1";
+    const STORAGE_KEY = "keuken-dashboard-clean-google-v1";
+    const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
+    const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+    let tokenClient;
+    let gapiInited = false;
+    let gisInited = false;
 
     const state = loadState();
 
     const people = [
-      { name: "Alexis", color: "#5cc8ff" },
-      { name: "Amylia", color: "#b47cff" },
-      { name: "Louize", color: "#ffb24d" },
-      { name: "Hannah", color: "#3ddc97" },
-      { name: "Loïc", color: "#ff6b7d" }
+      { name:"Alexis", color:"#5cc8ff" },
+      { name:"Amylia", color:"#b47cff" },
+      { name:"Louize", color:"#ffb24d" },
+      { name:"Hannah", color:"#3ddc97" },
+      { name:"Loïc", color:"#ff6b7d" }
     ];
 
     const demoEvents = [
-      { day: 0, time: "07:30", title: "Werk starten", person: "Carlos", color: "blue" },
-      { day: 0, time: "16:30", title: "Training", person: "Alexis", color: "purple" },
-      { day: 0, time: "18:00", title: "Samen eten", person: "Gezin", color: "orange" },
-
-      { day: 1, time: "13:30", title: "Afspraak", person: "Amylia", color: "red" },
-      { day: 1, time: "17:00", title: "Turnen", person: "Amylia", color: "purple" },
-
-      { day: 2, time: "16:00", title: "Opvang", person: "Loïc", color: "green" },
-      { day: 2, time: "19:00", title: "Planning", person: "Gezin", color: "orange" },
-
-      { day: 3, time: "10:00", title: "Schoolactiviteit", person: "Louize", color: "blue" },
-
-      { day: 4, time: "09:00", title: "Boodschappen", person: "Carlos & Steffi", color: "green" },
-      { day: 4, time: "11:00", title: "Match", person: "Alexis", color: "blue" }
+      { day:0,time:"07:30",title:"Werk starten",person:"Carlos",color:"blue" },
+      { day:0,time:"18:00",title:"Samen eten",person:"Gezin",color:"orange" },
+      { day:1,time:"17:00",title:"Turnen",person:"Amylia",color:"purple" },
+      { day:2,time:"16:00",title:"Opvang",person:"Loïc",color:"green" },
+      { day:4,time:"09:00",title:"Boodschappen",person:"Carlos & Steffi",color:"green" }
     ];
 
     function loadState(){
       const defaults = {
-        tasks: [
-          { text: "Schooltassen klaarzetten", done: false },
-          { text: "Vuilnis buitenzetten", done: false }
-        ],
-        shopping: [
-          { text: "Brood", done: false },
-          { text: "Melk", done: false },
-          { text: "Fruit", done: false }
-        ],
-        notes: "Weekmenu: spaghetti · kip met rijst · wraps · puree met vis · frietjes"
+        name:"Carlos",
+        city:"Dendermonde",
+        googleApiKey:"",
+        googleClientId:"",
+        calendarId:"primary",
+        googleConnected:false,
+        googleEvents:[],
+        tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],
+        shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],
+        notes:"Weekmenu: spaghetti · kip met rijst · wraps · puree met vis · frietjes"
       };
+      try{return {...defaults,...(JSON.parse(localStorage.getItem(STORAGE_KEY))||{})};}catch(e){return defaults;}
+    }
+
+    function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+
+    function gapiLoaded(){gapi.load("client",initializeGapiClient);}
+    async function initializeGapiClient(){gapiInited=true;maybeEnableGoogleButtons();}
+    function gisLoaded(){gisInited=true;maybeEnableGoogleButtons();}
+
+    async function maybeEnableGoogleButtons(){
+      const authorizeButton=document.getElementById("authorizeButton");
+      const refreshButton=document.getElementById("refreshCalendarButton");
+      const signoutButton=document.getElementById("signoutButton");
+      if(!authorizeButton||!refreshButton||!signoutButton)return;
+
+      refreshButton.style.display="none";
+      signoutButton.style.display="none";
+
+      if(!state.googleApiKey||!state.googleClientId){authorizeButton.textContent="Google gegevens invullen";return;}
+      if(!gapiInited||!gisInited){authorizeButton.textContent="Google laden...";return;}
 
       try{
-        return { ...defaults, ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}) };
-      }catch(e){
-        return defaults;
+        await gapi.client.init({apiKey:state.googleApiKey,discoveryDocs:[DISCOVERY_DOC]});
+        tokenClient=google.accounts.oauth2.initTokenClient({client_id:state.googleClientId,scope:SCOPES,callback:""});
+        authorizeButton.textContent=state.googleConnected?"Google verbonden":"Google verbinden";
+        refreshButton.style.display=state.googleConnected?"inline-block":"none";
+        signoutButton.style.display=state.googleConnected?"inline-block":"none";
+      }catch(error){
+        authorizeButton.textContent="Google fout";
+        console.error(error);
       }
     }
 
-    function saveState(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    function handleAuthClick(){
+      if(!state.googleApiKey||!state.googleClientId){toggleSettings(true);return;}
+      if(!tokenClient){alert("Google is nog niet klaar. Controleer API key, Client ID en je localhost/Live Server adres.");return;}
+
+      tokenClient.callback=async(resp)=>{
+        if(resp.error!==undefined){console.error(resp);alert("Google login is mislukt. Controleer of je Gmail-adres als Test user is toegevoegd.");return;}
+        state.googleConnected=true;
+        saveState();
+        await loadGoogleCalendarEvents();
+        maybeEnableGoogleButtons();
+      };
+
+      const existingToken=gapi.client.getToken();
+      tokenClient.requestAccessToken({prompt:existingToken?"":"consent"});
+    }
+
+    function handleSignoutClick(){
+      const token=gapi.client.getToken();
+      if(token!==null){google.accounts.oauth2.revoke(token.access_token);gapi.client.setToken("");}
+      state.googleConnected=false;
+      state.googleEvents=[];
+      saveState();
+      renderAll();
+      maybeEnableGoogleButtons();
+    }
+
+    async function loadGoogleCalendarEvents(){
+      if(!gapi.client||!gapi.client.calendar)return;
+      const start=startOfDay(new Date());
+      const end=addDays(start,5);
+      try{
+        const response=await gapi.client.calendar.events.list({
+          calendarId:state.calendarId||"primary",
+          timeMin:start.toISOString(),
+          timeMax:end.toISOString(),
+          showDeleted:false,
+          singleEvents:true,
+          maxResults:80,
+          orderBy:"startTime"
+        });
+        const events=response.result.items||[];
+        state.googleEvents=events.map(event=>{
+          const startValue=event.start.dateTime||event.start.date;
+          const isAllDay=!event.start.dateTime;
+          const date=new Date(startValue);
+          return {
+            dateKey:toDateKey(date),
+            time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),
+            title:event.summary||"Geen titel",
+            person:event.location||"Google Calendar",
+            color:colorForTitle(event.summary||""),
+            google:true
+          };
+        });
+        saveState();
+        renderAll();
+      }catch(error){console.error(error);alert("Agenda kon niet geladen worden. Controleer Calendar ID en Google Cloud instellingen.");}
     }
 
     function updateClock(){
-      const now = new Date();
-      document.getElementById("clock").textContent = now.toLocaleTimeString("nl-BE", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-
-      document.getElementById("dateText").textContent = now.toLocaleDateString("nl-BE", {
-        weekday: "long",
-        day: "numeric"
-      });
-
-      document.getElementById("subDateText").textContent = now.toLocaleDateString("nl-BE", {
-        month: "long",
-        year: "numeric"
-      });
+      const now=new Date();
+      document.getElementById("clock").textContent=now.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"});
+      document.getElementById("dateText").textContent=now.toLocaleDateString("nl-BE",{weekday:"long",day:"numeric"});
+      document.getElementById("subDateText").textContent=now.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});
     }
 
-    function startOfDay(date){
-      const d = new Date(date);
-      d.setHours(0,0,0,0);
-      return d;
-    }
+    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");}
 
-    function addDays(date, days){
-      const d = new Date(date);
-      d.setDate(d.getDate() + days);
-      return d;
+    function getAllEvents(){
+      if(state.googleEvents&&state.googleEvents.length)return state.googleEvents;
+      const today=startOfDay(new Date());
+      return demoEvents.map(e=>({...e,dateKey:toDateKey(addDays(today,e.day))}));
     }
 
     function renderFamilyStrip(){
-      const strip = document.getElementById("familyStrip");
-      strip.innerHTML = people.map((person) => {
-        const next = demoEvents.find(e => e.person.toLowerCase().includes(person.name.toLowerCase()));
-        const text = next ? `${next.time} · ${next.title}` : "Geen items";
-        return `
-          <div class="family-card" style="--accent:${person.color}">
-            <div class="family-name">${person.name}</div>
-            <div class="family-next">${text}</div>
-          </div>
-        `;
+      const events=getAllEvents();
+      const strip=document.getElementById("familyStrip");
+      strip.innerHTML=people.map(person=>{
+        const next=events.find(e=>String(e.title+" "+e.person).toLowerCase().includes(person.name.toLowerCase()));
+        const text=next?`${escapeHtml(next.time)} · ${escapeHtml(next.title)}`:"Geen items";
+        return `<div class="family-card" style="--accent:${person.color}"><div class="family-name">${escapeHtml(person.name)}</div><div class="family-next">${text}</div></div>`;
       }).join("");
     }
 
     function renderWeek(){
-      const grid = document.getElementById("weekGrid");
-      const today = startOfDay(new Date());
-
-      grid.innerHTML = Array.from({ length: 5 }, (_, i) => {
-        const date = addDays(today, i);
-        const num = date.toLocaleDateString("nl-BE", { day: "2-digit" });
-        const name = i === 0 ? "Vandaag" : date.toLocaleDateString("nl-BE", { weekday: "long" });
-        const dayEvents = demoEvents.filter(e => e.day === i);
-
-        const items = dayEvents.length
-          ? dayEvents.map(e => `
-            <div class="event ${e.color}">
-              <div class="event-time">${e.time}</div>
-              <div class="event-title">${e.title}</div>
-              <div class="event-person">${e.person}</div>
-            </div>
-          `).join("")
-          : `<div class="empty">Geen afspraken</div>`;
-
-        return `
-          <article class="day-column">
-            <div class="day-header">
-              <div class="day-left">
-                <div class="day-number">${num}</div>
-                <div class="day-name">${name}</div>
-              </div>
-              <div class="day-count">${dayEvents.length} items</div>
-            </div>
-            <div class="events">${items}</div>
-          </article>
-        `;
+      const grid=document.getElementById("weekGrid");
+      const today=startOfDay(new Date());
+      const events=getAllEvents();
+      grid.innerHTML=Array.from({length:5},(_,i)=>{
+        const date=addDays(today,i);
+        const key=toDateKey(date);
+        const num=date.toLocaleDateString("nl-BE",{day:"2-digit"});
+        const name=i===0?"Vandaag":date.toLocaleDateString("nl-BE",{weekday:"long"});
+        const dayEvents=events.filter(e=>e.dateKey===key).sort((a,b)=>String(a.time).localeCompare(String(b.time)));
+        const items=dayEvents.length?dayEvents.map(e=>`<div class="event ${e.color||"blue"}"><div class="event-time">${escapeHtml(e.time)}</div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-person">${escapeHtml(e.person||"")}</div></div>`).join(""):`<div class="empty">Geen afspraken</div>`;
+        return `<article class="day-column"><div class="day-header"><div class="day-left"><div class="day-number">${num}</div><div class="day-name">${escapeHtml(name)}</div></div><div class="day-count">${dayEvents.length} items</div></div><div class="events">${items}</div></article>`;
       }).join("");
     }
 
-    function renderList(type){
-      const list = document.getElementById(type === "tasks" ? "taskList" : "shoppingList");
-      list.innerHTML = state[type].map((item, index) => `
-        <div class="mini-item ${item.done ? "done" : ""}">
-          <button class="check" onclick="toggleItem('${type}', ${index})">${item.done ? "✓" : ""}</button>
-          <div class="mini-text">${escapeHtml(item.text)}</div>
-          <button class="delete" onclick="deleteItem('${type}', ${index})">×</button>
-        </div>
-      `).join("");
+    async function updateWeather(){
+      document.getElementById("weatherCity").textContent=state.city;
+      const cities={"dendermonde":{lat:51.03,lon:4.10},"deiremonne":{lat:51.03,lon:4.10},"asse":{lat:50.91,lon:4.20},"antwerpen":{lat:51.22,lon:4.40},"brussel":{lat:50.85,lon:4.35},"gent":{lat:51.05,lon:3.72}};
+      const coords=cities[state.city.trim().toLowerCase()]||cities.dendermonde;
+      try{
+        const url=`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max&timezone=Europe%2FBrussels`;
+        const res=await fetch(url);
+        const data=await res.json();
+        const temp=Math.round(data.current.temperature_2m);
+        document.getElementById("weatherTemp").textContent=`${temp}°`;
+        document.getElementById("weatherCondition").textContent=weatherLabel(data.current.weather_code);
+        const days=(data.daily?.time||[]).slice(1,4).map((date,idx)=>`${new Date(date).toLocaleDateString("nl-BE",{weekday:"short"})} ${Math.round(data.daily.temperature_2m_max[idx+1])}°`).map(x=>`<span>${x}</span>`).join("");
+        document.getElementById("weatherMini").innerHTML=days||`<span>${temp}°</span>`;
+      }catch(e){document.getElementById("weatherTemp").textContent="--°";document.getElementById("weatherCondition").textContent="Niet beschikbaar";}
     }
 
-    function addItem(type){
-      const input = document.getElementById(type === "tasks" ? "taskInput" : "shoppingInput");
-      const text = input.value.trim();
-      if(!text) return;
-      state[type].push({ text, done: false });
-      input.value = "";
-      saveState();
-      renderList(type);
-    }
+    function weatherLabel(code){if([0].includes(code))return"Zonnig";if([1,2].includes(code))return"Licht bewolkt";if([3].includes(code))return"Bewolkt";if([45,48].includes(code))return"Mist";if([51,53,55,61,63,65,80,81,82].includes(code))return"Regen";if([71,73,75,77,85,86].includes(code))return"Sneeuw";if([95,96,99].includes(code))return"Onweer";return"Weer";}
+    function colorForTitle(title){const l=title.toLowerCase();if(l.includes("alexis"))return"blue";if(l.includes("amylia"))return"purple";if(l.includes("louize"))return"orange";if(l.includes("hannah"))return"green";if(l.includes("loïc")||l.includes("loic"))return"red";return"blue";}
 
-    function toggleItem(type, index){
-      state[type][index].done = !state[type][index].done;
-      saveState();
-      renderList(type);
-    }
-
-    function deleteItem(type, index){
-      state[type].splice(index, 1);
-      saveState();
-      renderList(type);
-    }
+    function renderList(type){const list=document.getElementById(type==="tasks"?"taskList":"shoppingList");list.innerHTML=state[type].map((item,index)=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('${type}',${index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('${type}',${index})">×</button></div>`).join("");}
+    function addItem(type){const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");const text=input.value.trim();if(!text)return;state[type].push({text,done:false});input.value="";saveState();renderList(type);}
+    function toggleItem(type,index){state[type][index].done=!state[type][index].done;saveState();renderList(type);}
+    function deleteItem(type,index){state[type].splice(index,1);saveState();renderList(type);}
 
     function setupInputs(){
-      document.getElementById("taskInput").addEventListener("keydown", (e) => {
-        if(e.key === "Enter") addItem("tasks");
-      });
-
-      document.getElementById("shoppingInput").addEventListener("keydown", (e) => {
-        if(e.key === "Enter") addItem("shopping");
-      });
-
-      const notes = document.getElementById("notes");
-      notes.value = state.notes || "";
-      notes.addEventListener("input", () => {
-        state.notes = notes.value;
-        saveState();
-      });
+      document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("tasks");});
+      document.getElementById("shoppingInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("shopping");});
+      const notes=document.getElementById("notes");notes.value=state.notes||"";notes.addEventListener("input",()=>{state.notes=notes.value;saveState();});
     }
 
-    function escapeHtml(value){
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    function setupSettings(){
+      document.getElementById("nameSetting").value=state.name;
+      document.getElementById("citySetting").value=state.city;
+      document.getElementById("googleApiKeySetting").value=state.googleApiKey;
+      document.getElementById("googleClientIdSetting").value=state.googleClientId;
+      document.getElementById("calendarIdSetting").value=state.calendarId||"primary";
     }
 
-    function init(){
-      updateClock();
-      renderFamilyStrip();
-      renderWeek();
-      renderList("tasks");
-      renderList("shopping");
-      setupInputs();
-
-      setInterval(updateClock, 1000);
+    function saveSettings(){
+      state.name=document.getElementById("nameSetting").value.trim()||"Carlos";
+      state.city=document.getElementById("citySetting").value.trim()||"Dendermonde";
+      state.googleApiKey=document.getElementById("googleApiKeySetting").value.trim();
+      state.googleClientId=document.getElementById("googleClientIdSetting").value.trim();
+      state.calendarId=document.getElementById("calendarIdSetting").value.trim()||"primary";
+      state.googleConnected=false;
+      state.googleEvents=[];
+      saveState();
+      updateWeather();
+      renderAll();
+      maybeEnableGoogleButtons();
     }
 
+    function toggleSettings(forceOpen){document.getElementById("settings").classList.toggle("open",forceOpen===true?true:undefined);}
+    function startOfDay(date){const d=new Date(date);d.setHours(0,0,0,0);return d;}
+    function addDays(date,days){const d=new Date(date);d.setDate(d.getDate()+days);return d;}
+    function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
+    function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
+
+    function init(){updateClock();setupInputs();setupSettings();renderAll();updateWeather();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(()=>{if(state.googleConnected)loadGoogleCalendarEvents();},10*60*1000);}
     init();
   </script>
 </body>
