@@ -118,7 +118,26 @@
     .calendar-id{font-size:11px;color:rgba(255,255,255,0.48);margin-top:2px;word-break:break-all;}
 
     @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{grid-template-columns:repeat(2,1fr);}.bottom{grid-template-columns:repeat(2,1fr);}}
-    @media (max-width:780px){.family-strip,.week-grid,.bottom{grid-template-columns:1fr;}.clock{font-size:64px;}}
+    @media (max-width:780px){
+      html,body{overflow:auto;background:#071019;}
+      body{background-image:linear-gradient(180deg,rgba(5,10,18,0.96),rgba(5,10,18,0.94)),url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');}
+      .app{height:auto;min-height:100vh;padding:14px;display:block;}
+      .top,.middle,.bottom .panel:nth-child(2),.bottom .panel:nth-child(3),.bottom .panel:nth-child(4),.weather{display:none!important;}
+      .bottom{display:block!important;}
+      .bottom .panel:first-child{display:flex!important;min-height:calc(100vh - 28px);border-radius:22px;padding:18px;}
+      .bottom .panel:first-child .panel-title{font-size:16px;margin-bottom:16px;}
+      .panel-top{grid-template-columns:1fr 54px;gap:10px;margin-bottom:14px;}
+      .panel input{font-size:18px;padding:16px;border-radius:16px;}
+      .panel button{min-height:54px;border-radius:16px;font-size:22px;}
+      .mini-list{gap:10px;overflow:visible;}
+      .mini-item{padding:14px 12px;border-radius:16px;grid-template-columns:36px 1fr 36px;}
+      .check{width:34px;height:34px;border-radius:12px;font-size:18px;}
+      .mini-text{font-size:18px;}
+      .delete{width:34px;height:34px;border-radius:12px;font-size:22px;}
+      .settings{right:14px;bottom:14px;}
+      .floating{width:50px;height:50px;font-size:20px;}
+      .settings-panel{right:0;bottom:62px;width:calc(100vw - 28px);}
+    }
   </style>
 </head>
 <body>
