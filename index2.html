@@ -111,6 +111,8 @@
     .mini-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:9px 10px;}
     .check{width:24px;height:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);color:var(--green);display:grid;place-items:center;font-weight:900;cursor:pointer;font-size:13px;}
     .mini-text{font-size:14px;font-weight:700;line-height:1.3;}
+    .shopping-category{margin:8px 2px 2px;color:rgba(255,255,255,0.52);font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:950;}
+    .shopping-category:first-child{margin-top:0;}
     .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
     .delete{width:24px;height:24px;border:0;border-radius:8px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:16px;cursor:pointer;}
     .notes{flex:1;resize:none;min-height:0;line-height:1.5;font-weight:700;}
@@ -196,8 +198,8 @@
         display:flex!important;
         min-height:0;
         overflow:hidden;
-        border-radius:28px;
-        padding:16px;
+        border-radius:22px;
+        padding:12px;
         border:1px solid rgba(255,255,255,0.12);
         background:
           linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.045)),
@@ -226,18 +228,18 @@
       }
 
       .bottom .panel:first-child{
-        height:56vh;
+        height:60vh;
       }
 
       .bottom .panel:nth-child(3){
-        height:34vh;
+        height:30vh;
       }
 
       .bottom .panel:first-child .panel-title,
       .bottom .panel:nth-child(3) .panel-title{
-        font-size:12px;
-        letter-spacing:.16em;
-        margin-bottom:12px;
+        font-size:11px;
+        letter-spacing:.15em;
+        margin-bottom:8px;
         color:rgba(255,255,255,0.82);
         display:flex;
         align-items:center;
@@ -258,15 +260,15 @@
 
       .panel-top{
         display:grid;
-        grid-template-columns:1fr 46px;
-        gap:9px;
-        margin-bottom:13px;
+        grid-template-columns:1fr 40px;
+        gap:7px;
+        margin-bottom:9px;
       }
 
       .panel input{
-        font-size:16px;
-        padding:13px 14px;
-        border-radius:18px;
+        font-size:14px;
+        padding:10px 12px;
+        border-radius:14px;
         border:1px solid rgba(255,255,255,0.12);
         background:rgba(255,255,255,0.075);
         color:#fff;
@@ -287,9 +289,9 @@
       }
 
       .panel button{
-        min-height:46px;
-        border-radius:18px;
-        font-size:19px;
+        min-height:38px;
+        border-radius:14px;
+        font-size:17px;
         font-weight:950;
         background:linear-gradient(135deg,#5cc8ff,#3ddc97);
         box-shadow:0 14px 30px rgba(61,220,151,0.18);
@@ -300,7 +302,7 @@
         flex:1;
         min-height:0;
         overflow:auto;
-        gap:9px;
+        gap:6px;
         padding-right:0;
         scrollbar-width:none;
         -ms-overflow-style:none;
@@ -313,47 +315,53 @@
 
       .mini-item{
         display:grid;
-        grid-template-columns:32px 1fr 32px;
-        gap:10px;
+        grid-template-columns:26px 1fr 26px;
+        gap:8px;
         align-items:center;
-        padding:12px 11px;
-        border-radius:18px;
+        padding:8px 9px;
+        border-radius:13px;
         background:linear-gradient(180deg,rgba(255,255,255,0.075),rgba(255,255,255,0.035));
         border:1px solid rgba(255,255,255,0.075);
         box-shadow:0 10px 24px rgba(0,0,0,0.16);
       }
 
       .check{
-        width:30px;
-        height:30px;
-        border-radius:11px;
-        font-size:15px;
+        width:24px;
+        height:24px;
+        border-radius:8px;
+        font-size:12px;
         border:1px solid rgba(255,255,255,0.18);
         background:rgba(255,255,255,0.07);
       }
 
       .mini-text{
-        font-size:16px;
-        font-weight:850;
-        line-height:1.34;
+        font-size:14px;
+        font-weight:830;
+        line-height:1.26;
+      }
+
+      .shopping-category{
+        margin:7px 2px 1px;
+        font-size:9px;
+        color:rgba(255,255,255,0.46);
       }
 
       .delete{
-        width:30px;
-        height:30px;
-        border-radius:11px;
-        font-size:18px;
+        width:24px;
+        height:24px;
+        border-radius:8px;
+        font-size:15px;
         background:rgba(255,255,255,0.06);
         color:rgba(255,255,255,0.62);
       }
 
       .meal-row{
         display:grid;
-        grid-template-columns:42px 1fr;
-        gap:11px;
+        grid-template-columns:34px 1fr;
+        gap:8px;
         align-items:center;
-        padding:11px 12px;
-        border-radius:18px;
+        padding:8px 9px;
+        border-radius:13px;
         background:linear-gradient(180deg,rgba(255,255,255,0.075),rgba(255,255,255,0.035));
         border:1px solid rgba(255,255,255,0.075);
         box-shadow:0 10px 24px rgba(0,0,0,0.16);
@@ -367,7 +375,7 @@
       }
 
       .meal-input{
-        font-size:16px!important;
+        font-size:14px!important;
         font-weight:850;
         color:#fff!important;
         background:transparent!important;
@@ -398,9 +406,9 @@
       }
 
       .floating{
-        width:42px;
-        height:42px;
-        font-size:17px;
+        width:36px;
+        height:36px;
+        font-size:15px;
         border-radius:999px;
         background:rgba(0,0,0,0.46);
         border:1px solid rgba(255,255,255,0.16);
@@ -847,7 +855,52 @@
     function renderList(type){
       const list=document.getElementById(type==="tasks"?"taskList":"shoppingList");
       if(!list)return;
+
+      if(type==="shopping"){
+        list.innerHTML=renderGroupedShopping();
+        return;
+      }
+
       list.innerHTML=state[type].map((item,index)=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('${type}',${index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('${type}',${index})">×</button></div>`).join("");
+    }
+
+    function renderGroupedShopping(){
+      const groups={};
+      state.shopping.forEach((item,index)=>{
+        const category=getShoppingCategory(item.text);
+        if(!groups[category])groups[category]=[];
+        groups[category].push({...item,index});
+      });
+
+      const categoryOrder=["Groenten & fruit","Brood & ontbijt","Charcuterie & kaas","Zuivel","Vlees & vis","Diepvries","Droge voeding","Dranken","Snoep & snacks","Huishouden","Verzorging","Andere"];
+
+      return categoryOrder
+        .filter(category=>groups[category]?.length)
+        .map(category=>{
+          const items=groups[category]
+            .sort((a,b)=>Number(a.done)-Number(b.done)||String(a.text).localeCompare(String(b.text),"nl-BE"))
+            .map(item=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('shopping',${item.index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('shopping',${item.index})">×</button></div>`)
+            .join("");
+          return `<div class="shopping-category">${escapeHtml(category)}</div>${items}`;
+        })
+        .join("");
+    }
+
+    function getShoppingCategory(text){
+      const t=String(text||"").toLowerCase();
+      const has=(words)=>words.some(word=>t.includes(word));
+      if(has(["kaas","hesp","ham","salami","kipfilet","kalkoen","charcuterie","preparé","prepare","americain","paté","pate","worst","spek","boterhamworst"]))return"Charcuterie & kaas";
+      if(has(["melk","yoghurt","yogurt","boter","room","kaasspread","platte kaas","kwark","pudding","dessert","eieren","ei "]))return"Zuivel";
+      if(has(["appel","appels","banaan","bananen","peer","peren","aardbei","aardbeien","tomaat","tomaten","sla","komkommer","wortel","wortels","ajuin","ui","uien","paprika","courgette","broccoli","bloemkool","aardappel","aardappelen","fruit","groenten","groente"]))return"Groenten & fruit";
+      if(has(["brood","pistolet","sandwich","stokbrood","croissant","ontbijtkoek","cornflakes","granola","havermout","confituur","choco","peperkoek"]))return"Brood & ontbijt";
+      if(has(["kip","gehakt","steak","hamburger","vlees","vis","zalm","tonijn","scampi","worst","chipolata","spekblokjes"]))return"Vlees & vis";
+      if(has(["diepvries","pizza","frieten","friet","ijs","erwtjes","spinazie diepvries"]))return"Diepvries";
+      if(has(["pasta","spaghetti","rijst","wraps","saus","tomatensaus","bloem","suiker","olie","azijn","zout","peper","soep","conserven","blik","puree","noedels","mie"]))return"Droge voeding";
+      if(has(["water","cola","frisdrank","sap","koffie","thee","bier","wijn","drank","melkdrank"]))return"Dranken";
+      if(has(["chips","koek","koeken","snoep","chocolade","nootjes","snack","wafel","wafels"]))return"Snoep & snacks";
+      if(has(["wc papier","toiletpapier","keukenrol","allesreiniger","afwas","dreft","wasmiddel","verzachter","vuilzak","vuilniszak","poets","spons","doekjes"]))return"Huishouden";
+      if(has(["shampoo","zeep","tandpasta","deodorant","deo","gel","scheermes","verzorging","babydoekjes","luiers"]))return"Verzorging";
+      return"Andere";
     }
 
     function renderWeekMenu(){

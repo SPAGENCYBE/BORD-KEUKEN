@@ -98,29 +98,29 @@
 
     .bottom{display:grid;grid-template-columns:1.18fr 1.18fr 1.18fr 0.9fr 220px;gap:14px;align-items:stretch;min-height:0;overflow:hidden;}
     .panel,.weather{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
-    .panel-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:12px;}
-    .panel-top{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px;}
-    .panel input,.panel textarea,.settings-panel input{width:100%;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.18);color:#fff;border-radius:14px;padding:11px 12px;outline:none;font:inherit;}
+    .panel-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:9px;}
+    .panel-top{display:grid;grid-template-columns:1fr auto;gap:7px;margin-bottom:8px;}
+    .panel input,.panel textarea,.settings-panel input{width:100%;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.18);color:#fff;border-radius:12px;padding:9px 10px;outline:none;font:inherit;font-size:12px;}
     .panel input::placeholder,.panel textarea::placeholder,.settings-panel input::placeholder{color:rgba(255,255,255,0.35);}
-    .panel button,.btn{border:0;border-radius:14px;min-width:42px;padding:0 14px;min-height:42px;background:linear-gradient(135deg,var(--blue),var(--green));color:#071019;font-weight:900;cursor:pointer;}
+    .panel button,.btn{border:0;border-radius:12px;min-width:36px;padding:0 11px;min-height:34px;background:linear-gradient(135deg,var(--blue),var(--green));color:#071019;font-weight:900;cursor:pointer;}
     .btn.secondary{color:#fff;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.14);}
     .btn.danger{color:#fff;background:rgba(255,107,125,0.18);border:1px solid rgba(255,107,125,0.24);}
 
     .mini-list{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0;flex:1;padding-right:0;scrollbar-width:none;-ms-overflow-style:none;}
     .mini-list::-webkit-scrollbar{display:none;}
-    .mini-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:9px 10px;}
-    .check{width:24px;height:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);color:var(--green);display:grid;place-items:center;font-weight:900;cursor:pointer;font-size:13px;}
-    .mini-text{font-size:14px;font-weight:700;line-height:1.3;}
+    .mini-item{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:rgba(0,0,0,0.16);border-radius:11px;padding:7px 8px;}
+    .check{width:20px;height:20px;border-radius:7px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);color:var(--green);display:grid;place-items:center;font-weight:900;cursor:pointer;font-size:11px;}
+    .mini-text{font-size:12px;font-weight:700;line-height:1.25;}
     .shopping-category{margin:8px 2px 2px;color:rgba(255,255,255,0.52);font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:950;}
     .shopping-category:first-child{margin-top:0;}
     .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
-    .delete{width:24px;height:24px;border:0;border-radius:8px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:16px;cursor:pointer;}
+    .delete{width:20px;height:20px;border:0;border-radius:7px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:14px;cursor:pointer;}
     .notes{flex:1;resize:none;min-height:0;line-height:1.5;font-weight:700;}
     .weekmenu-list{display:flex;flex-direction:column;gap:7px;overflow:auto;min-height:0;flex:1;padding-right:0;scrollbar-width:none;-ms-overflow-style:none;}
     .weekmenu-list::-webkit-scrollbar{display:none;}
-    .meal-row{display:grid;grid-template-columns:42px 1fr;gap:9px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:8px 10px;}
-    .meal-day{font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:var(--muted);font-weight:950;}
-    .meal-input{width:100%;border:0!important;background:transparent!important;color:#fff!important;padding:0!important;border-radius:0!important;font-size:14px;font-weight:800;outline:none;}
+    .meal-row{display:grid;grid-template-columns:38px 1fr;gap:8px;align-items:center;background:rgba(0,0,0,0.16);border-radius:11px;padding:6px 8px;}
+    .meal-day{font-size:9px;text-transform:uppercase;letter-spacing:.10em;color:var(--muted);font-weight:950;}
+    .meal-input{width:100%;border:0!important;background:transparent!important;color:#fff!important;padding:0!important;border-radius:0!important;font-size:12px;font-weight:800;outline:none;}
     .meal-input::placeholder{color:rgba(255,255,255,0.34);}
 
     .weather{justify-content:space-between;position:relative;overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image .35s ease;border:1px solid rgba(255,255,255,0.12);}
@@ -133,10 +133,10 @@
     .weather.fog{background-image:linear-gradient(160deg,rgba(120,130,140,0.18),rgba(40,45,55,0.28)),url('https://images.unsplash.com/photo-1487621167305-5d248087c724?auto=format&fit=crop&w=1200&q=80');}
     .weather.snow{background-image:linear-gradient(160deg,rgba(180,200,220,0.12),rgba(40,60,90,0.20)),url('https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=1200&q=80');}
     .weather.storm{background-image:linear-gradient(160deg,rgba(25,25,40,0.20),rgba(5,8,18,0.38)),url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80');}
-    .weather-temp{font-size:62px;line-height:.9;font-weight:250;letter-spacing:-0.08em;position:relative;z-index:1;text-shadow:0 12px 32px rgba(0,0,0,0.42);}
-    .weather-city{margin-top:8px;font-size:17px;font-weight:900;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
-    .weather-condition{margin-top:3px;font-size:13px;color:rgba(255,255,255,0.82);font-weight:800;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
-    .weather-mini{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;font-weight:900;color:rgba(255,255,255,0.88);position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
+    .weather-temp{font-size:48px;line-height:.9;font-weight:250;letter-spacing:-0.08em;position:relative;z-index:1;text-shadow:0 12px 32px rgba(0,0,0,0.42);}
+    .weather-city{margin-top:6px;font-size:14px;font-weight:900;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
+    .weather-condition{margin-top:2px;font-size:11px;color:rgba(255,255,255,0.82);font-weight:800;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
+    .weather-mini{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,0.88);position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
 
     .settings{position:fixed;right:22px;bottom:22px;z-index:40;opacity:0;transition:opacity .22s ease, transform .22s ease;transform:translateY(8px);}
     .settings:hover,.settings:focus-within{opacity:1;transform:translateY(0);}
@@ -887,19 +887,23 @@
     }
 
     function getShoppingCategory(text){
-      const t=String(text||"").toLowerCase();
-      const has=(words)=>words.some(word=>t.includes(word));
-      if(has(["kaas","hesp","ham","salami","kipfilet","kalkoen","charcuterie","preparé","prepare","americain","paté","pate","worst","spek","boterhamworst"]))return"Charcuterie & kaas";
-      if(has(["melk","yoghurt","yogurt","boter","room","kaasspread","platte kaas","kwark","pudding","dessert","eieren","ei "]))return"Zuivel";
-      if(has(["appel","appels","banaan","bananen","peer","peren","aardbei","aardbeien","tomaat","tomaten","sla","komkommer","wortel","wortels","ajuin","ui","uien","paprika","courgette","broccoli","bloemkool","aardappel","aardappelen","fruit","groenten","groente"]))return"Groenten & fruit";
-      if(has(["brood","pistolet","sandwich","stokbrood","croissant","ontbijtkoek","cornflakes","granola","havermout","confituur","choco","peperkoek"]))return"Brood & ontbijt";
-      if(has(["kip","gehakt","steak","hamburger","vlees","vis","zalm","tonijn","scampi","worst","chipolata","spekblokjes"]))return"Vlees & vis";
-      if(has(["diepvries","pizza","frieten","friet","ijs","erwtjes","spinazie diepvries"]))return"Diepvries";
-      if(has(["pasta","spaghetti","rijst","wraps","saus","tomatensaus","bloem","suiker","olie","azijn","zout","peper","soep","conserven","blik","puree","noedels","mie"]))return"Droge voeding";
-      if(has(["water","cola","frisdrank","sap","koffie","thee","bier","wijn","drank","melkdrank"]))return"Dranken";
-      if(has(["chips","koek","koeken","snoep","chocolade","nootjes","snack","wafel","wafels"]))return"Snoep & snacks";
-      if(has(["wc papier","toiletpapier","keukenrol","allesreiniger","afwas","dreft","wasmiddel","verzachter","vuilzak","vuilniszak","poets","spons","doekjes"]))return"Huishouden";
-      if(has(["shampoo","zeep","tandpasta","deodorant","deo","gel","scheermes","verzorging","babydoekjes","luiers"]))return"Verzorging";
+      const t=String(text||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+      const words=t.split(/[^a-z0-9]+/).filter(Boolean);
+      const wordSet=new Set(words);
+      const phrase=(phrases)=>phrases.some(p=>t.includes(p));
+      const word=(items)=>items.some(item=>wordSet.has(item));
+
+      if(phrase(["wc papier","toiletpapier","keukenrol","allesreiniger","vuilniszak","vuilzak","vuilzakken","afwasmiddel"]) || word(["dreft","wasmiddel","verzachter","poets","spons","doekjes","vuilzak","vuilzakken"]))return"Huishouden";
+      if(word(["kaas","hesp","ham","salami","kipfilet","kalkoen","charcuterie","prepare","americain","pate","worst","spek","boterhamworst"]))return"Charcuterie & kaas";
+      if(phrase(["platte kaas"]) || word(["melk","yoghurt","yogurt","boter","room","kaasspread","kwark","pudding","dessert","eieren","ei"]))return"Zuivel";
+      if(word(["appel","appels","banaan","bananen","peer","peren","aardbei","aardbeien","tomaat","tomaten","sla","komkommer","wortel","wortels","ajuin","ui","uien","paprika","courgette","broccoli","bloemkool","aardappel","aardappelen","fruit","groenten","groente"]))return"Groenten & fruit";
+      if(word(["brood","pistolet","sandwich","stokbrood","croissant","ontbijtkoek","cornflakes","granola","havermout","confituur","choco","peperkoek"]))return"Brood & ontbijt";
+      if(word(["kip","gehakt","steak","hamburger","vlees","vis","zalm","tonijn","scampi","chipolata","spekblokjes"]))return"Vlees & vis";
+      if(phrase(["spinazie diepvries"]) || word(["diepvries","pizza","frieten","friet","ijs","erwtjes"]))return"Diepvries";
+      if(word(["pasta","spaghetti","rijst","wraps","saus","tomatensaus","bloem","suiker","olie","azijn","zout","peper","soep","conserven","blik","puree","noedels","mie"]))return"Droge voeding";
+      if(word(["water","cola","frisdrank","sap","koffie","thee","bier","wijn","drank","melkdrank"]))return"Dranken";
+      if(word(["chips","koek","koeken","snoep","chocolade","nootjes","snack","wafel","wafels"]))return"Snoep & snacks";
+      if(word(["shampoo","zeep","tandpasta","deodorant","deo","gel","scheermes","verzorging","babydoekjes","luiers"]))return"Verzorging";
       return"Andere";
     }
 
@@ -977,6 +981,8 @@
       console.assert(getWeatherTheme(0) === "sunny", "Weercode 0 moet sunny theme geven.");
       console.assert(getWeatherTheme(61) === "rain", "Weercode 61 moet rain theme geven.");
       console.assert(colorForTitle("Training Alexis") === "blue", "Alexis events moeten blauw zijn.");
+      console.assert(getShoppingCategory("vuilzakken") === "Huishouden", "vuilzakken moet bij Huishouden staan.");
+      console.assert(getShoppingCategory("ui") === "Groenten & fruit", "ui moet bij Groenten & fruit staan.");
     }
 
     function init(){
