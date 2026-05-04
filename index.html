@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Keuken Dashboard</title>
 
+  <!--
+    Belangrijk: deze functies moeten al bestaan vóór de async Google-scripts laden.
+    Anders kan Chrome "gisLoaded is not defined" geven als het script sneller laadt dan de code onderaan de pagina.
+  -->
+  <script>
+    window.__gapiLoaded = false;
+    window.__gisLoaded = false;
+
+    window.gapiLoaded = function gapiLoaded() {
+      window.__gapiLoaded = true;
+      if (typeof window.initializeGapiClient === "function") {
+        window.initializeGapiClient();
+      }
+    };
+
+    window.gisLoaded = function gisLoaded() {
+      window.__gisLoaded = true;
+      if (typeof window.onGisReady === "function") {
+        window.onGisReady();
+      }
+    };
+  </script>
+
   <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
   <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
   <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-app-compat.js"></script>
@@ -41,7 +64,7 @@
     button,input,textarea{font:inherit;}
     button{cursor:pointer;}
 
-    .app{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto 1fr auto;gap:18px;backdrop-filter:blur(2px);}
+    .app{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr) 380px;gap:18px;backdrop-filter:blur(2px);}
     .top{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;}
     .family-strip{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:12px;}
     .family-card{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.05));border:1px solid var(--border);border-radius:18px;padding:12px 14px;box-shadow:var(--shadow);backdrop-filter:blur(14px);min-height:78px;position:relative;overflow:hidden;}
@@ -63,18 +86,17 @@
     .day-name{font-size:16px;color:var(--muted);font-weight:800;text-transform:capitalize;}
     .day-count{font-size:12px;color:var(--soft);font-weight:800;letter-spacing:.10em;text-transform:uppercase;}
 
-    .events{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0;padding-right:2px;}
-    .events::-webkit-scrollbar{width:6px;}
-    .events::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:999px;}
-    .event{background:rgba(0,0,0,0.20);border-left:4px solid var(--blue);border-radius:14px;padding:10px 12px;}
+    .events{display:flex;flex-direction:column;gap:7px;overflow:auto;min-height:0;padding-right:0;scrollbar-width:none;-ms-overflow-style:none;}
+    .events::-webkit-scrollbar{display:none;}
+    .event{background:rgba(0,0,0,0.20);border-left:3px solid var(--blue);border-radius:12px;padding:7px 9px;}
     .event.blue{border-left-color:var(--blue);}.event.green{border-left-color:var(--green);}.event.purple{border-left-color:var(--purple);}.event.orange{border-left-color:var(--orange);}.event.red{border-left-color:var(--red);}
-    .event-time{font-size:13px;font-weight:900;margin-bottom:4px;color:#fff;}
-    .event-title{font-size:15px;font-weight:800;line-height:1.25;}
-    .event-person{margin-top:4px;font-size:12px;color:var(--soft);font-weight:700;}
+    .event-time{font-size:11px;font-weight:900;margin-bottom:2px;color:#fff;}
+    .event-title{font-size:13px;font-weight:800;line-height:1.22;}
+    .event-person{margin-top:2px;font-size:10px;color:var(--soft);font-weight:700;}
     .empty{color:var(--soft);font-size:14px;font-weight:700;padding-top:6px;}
 
-    .bottom{display:grid;grid-template-columns:0.95fr 0.95fr 1.25fr 0.95fr 220px;gap:14px;align-items:stretch;}
-    .panel,.weather{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;min-height:150px;}
+    .bottom{display:grid;grid-template-columns:1.18fr 1.18fr 1.18fr 0.9fr 220px;gap:14px;align-items:stretch;min-height:0;overflow:hidden;}
+    .panel,.weather{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
     .panel-title{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:12px;}
     .panel-top{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px;}
     .panel input,.panel textarea,.settings-panel input{width:100%;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.18);color:#fff;border-radius:14px;padding:11px 12px;outline:none;font:inherit;}
@@ -83,14 +105,16 @@
     .btn.secondary{color:#fff;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.14);}
     .btn.danger{color:#fff;background:rgba(255,107,125,0.18);border:1px solid rgba(255,107,125,0.24);}
 
-    .mini-list{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0;}
+    .mini-list{display:flex;flex-direction:column;gap:8px;overflow:auto;min-height:0;flex:1;padding-right:0;scrollbar-width:none;-ms-overflow-style:none;}
+    .mini-list::-webkit-scrollbar{display:none;}
     .mini-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:9px 10px;}
     .check{width:24px;height:24px;border-radius:8px;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.05);color:var(--green);display:grid;place-items:center;font-weight:900;cursor:pointer;font-size:13px;}
     .mini-text{font-size:14px;font-weight:700;line-height:1.3;}
     .mini-item.done .mini-text{opacity:.45;text-decoration:line-through;}
     .delete{width:24px;height:24px;border:0;border-radius:8px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.56);font-size:16px;cursor:pointer;}
     .notes{flex:1;resize:none;min-height:0;line-height:1.5;font-weight:700;}
-    .weekmenu-list{display:flex;flex-direction:column;gap:7px;overflow:auto;min-height:0;}
+    .weekmenu-list{display:flex;flex-direction:column;gap:7px;overflow:auto;min-height:0;flex:1;padding-right:0;scrollbar-width:none;-ms-overflow-style:none;}
+    .weekmenu-list::-webkit-scrollbar{display:none;}
     .meal-row{display:grid;grid-template-columns:42px 1fr;gap:9px;align-items:center;background:rgba(0,0,0,0.16);border-radius:12px;padding:8px 10px;}
     .meal-day{font-size:11px;text-transform:uppercase;letter-spacing:.10em;color:var(--muted);font-weight:950;}
     .meal-input{width:100%;border:0!important;background:transparent!important;color:#fff!important;padding:0!important;border-radius:0!important;font-size:14px;font-weight:800;outline:none;}
@@ -103,7 +127,8 @@
     .weather-condition{margin-top:3px;font-size:13px;color:rgba(255,255,255,0.76);font-weight:700;position:relative;z-index:1;}
     .weather-mini{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.82);position:relative;z-index:1;}
 
-    .settings{position:fixed;right:22px;bottom:22px;z-index:40;}
+    .settings{position:fixed;right:22px;bottom:22px;z-index:40;opacity:0;transition:opacity .22s ease, transform .22s ease;transform:translateY(8px);}
+    .settings:hover,.settings:focus-within{opacity:1;transform:translateY(0);}
     .floating{width:56px;height:56px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.38);color:#fff;font-size:23px;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
     .settings-panel{display:none;position:absolute;right:0;bottom:70px;width:min(620px,calc(100vw - 44px));max-height:calc(100vh - 110px);overflow:auto;background:rgba(7,13,21,0.94);border:1px solid rgba(255,255,255,0.14);border-radius:24px;box-shadow:var(--shadow);backdrop-filter:blur(20px);padding:18px;gap:12px;flex-direction:column;}
     .settings.open .settings-panel{display:flex;}
@@ -117,24 +142,25 @@
     .calendar-name{font-weight:850;font-size:14px;}
     .calendar-id{font-size:11px;color:rgba(255,255,255,0.48);margin-top:2px;word-break:break-all;}
 
-    @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{grid-template-columns:repeat(2,1fr);}.bottom{grid-template-columns:repeat(2,1fr);}}
+    @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{grid-template-columns:repeat(2,1fr);}.bottom{grid-template-columns:repeat(2,1fr);}}
     @media (max-width:780px){
       html,body{overflow:auto;background:#071019;}
       body{background-image:linear-gradient(180deg,rgba(5,10,18,0.96),rgba(5,10,18,0.94)),url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');}
       .app{height:auto;min-height:100vh;padding:14px;display:block;}
-      .top,.middle,.bottom .panel:nth-child(2),.bottom .panel:nth-child(3),.bottom .panel:nth-child(4),.weather{display:none!important;}
-      .bottom{display:block!important;}
-      .bottom .panel:first-child{display:flex!important;min-height:calc(100vh - 28px);border-radius:22px;padding:18px;}
-      .bottom .panel:first-child .panel-title{font-size:16px;margin-bottom:16px;}
+      .top,.middle,.bottom .panel:nth-child(2),.bottom .panel:nth-child(4),.weather{display:none!important;}
+      .bottom{display:grid!important;grid-template-columns:1fr!important;gap:14px!important;}
+      .bottom .panel:first-child{display:flex!important;height:58vh;min-height:0;border-radius:22px;padding:18px;overflow:hidden;}
+      .bottom .panel:nth-child(3){display:flex!important;height:38vh;min-height:0;border-radius:22px;padding:18px;overflow:hidden;}
+      .bottom .panel:first-child .panel-title,.bottom .panel:nth-child(3) .panel-title{font-size:16px;margin-bottom:16px;}
       .panel-top{grid-template-columns:1fr 54px;gap:10px;margin-bottom:14px;}
       .panel input{font-size:18px;padding:16px;border-radius:16px;}
       .panel button{min-height:54px;border-radius:16px;font-size:22px;}
-      .mini-list{gap:10px;overflow:visible;}
+      .mini-list,.weekmenu-list{gap:10px;overflow:auto;min-height:0;flex:1;scrollbar-width:none;-ms-overflow-style:none;}
       .mini-item{padding:14px 12px;border-radius:16px;grid-template-columns:36px 1fr 36px;}
       .check{width:34px;height:34px;border-radius:12px;font-size:18px;}
       .mini-text{font-size:18px;}
       .delete{width:34px;height:34px;border-radius:12px;font-size:22px;}
-      .settings{right:14px;bottom:14px;}
+      .settings{right:14px;bottom:14px;opacity:.18;transform:none;}
       .floating{width:50px;height:50px;font-size:20px;}
       .settings-panel{right:0;bottom:62px;width:calc(100vw - 28px);}
     }
@@ -242,8 +268,7 @@
     let firebaseDb = null;
     let cloudReady = false;
     let applyingCloudUpdate = false;
-
-    let tokenClient;
+    let tokenClient = null;
     let gapiInited = false;
     let gisInited = false;
 
@@ -276,15 +301,7 @@
         tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],
         shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],
         notes:"Niet vergeten: schoolbrief tekenen · vuilnis buitenzetten",
-        weekMenu:{
-          ma:"Spaghetti",
-          di:"Kip met rijst",
-          wo:"Wraps",
-          do:"Puree met vis",
-          vr:"Frietjes",
-          za:"Pizza / makkelijk",
-          zo:"Familie-eten"
-        }
+        weekMenu:{ma:"Spaghetti",di:"Kip met rijst",wo:"Wraps",do:"Puree met vis",vr:"Frietjes",za:"Pizza / makkelijk",zo:"Familie-eten"}
       };
       try{return {...defaults,...(JSON.parse(localStorage.getItem(STORAGE_KEY))||{})};}catch(e){return defaults;}
     }
@@ -293,19 +310,12 @@
 
     function initFirebaseSync(){
       try{
-        if(!window.firebase){
-          console.warn("Firebase SDK niet geladen.");
-          return;
-        }
-        if(!firebase.apps.length){
-          firebase.initializeApp(FIREBASE_CONFIG);
-        }
+        if(!window.firebase){console.warn("Firebase SDK niet geladen.");return;}
+        if(!firebase.apps.length){firebase.initializeApp(FIREBASE_CONFIG);}
         firebaseDb=firebase.database();
         cloudReady=true;
         startCloudListeners();
-      }catch(error){
-        console.error("Firebase fout:", error);
-      }
+      }catch(error){console.error("Firebase fout:",error);}
     }
 
     function startCloudListeners(){
@@ -319,9 +329,7 @@
           saveState();
           renderList("shopping");
           applyingCloudUpdate=false;
-        }else if(state.shopping.length){
-          syncCloudCollection("shopping");
-        }
+        }else if(state.shopping.length){syncCloudCollection("shopping");}
       });
 
       firebaseDb.ref("tasks").on("value", snapshot=>{
@@ -332,9 +340,7 @@
           saveState();
           renderList("tasks");
           applyingCloudUpdate=false;
-        }else if(state.tasks.length){
-          syncCloudCollection("tasks");
-        }
+        }else if(state.tasks.length){syncCloudCollection("tasks");}
       });
 
       firebaseDb.ref("weekMenu").on("value", snapshot=>{
@@ -345,9 +351,7 @@
           saveState();
           renderWeekMenu();
           applyingCloudUpdate=false;
-        }else if(state.weekMenu){
-          syncCloudWeekMenu();
-        }
+        }else if(state.weekMenu){syncCloudWeekMenu();}
       });
     }
 
@@ -361,18 +365,27 @@
       firebaseDb.ref("weekMenu").set(state.weekMenu||{}).catch(console.error);
     }
 
-    function gapiLoaded(){gapi.load("client",initializeGapiClient);}
-    async function initializeGapiClient(){
+    window.initializeGapiClient = async function initializeGapiClient(){
+      if(!window.gapi){return;}
       try{
-        await gapi.client.init({apiKey:GOOGLE_API_KEY,discoveryDocs:[DISCOVERY_DOC]});
-        gapiInited=true;
-        maybeEnableGoogleButtons();
+        await gapi.load("client", async()=>{
+          await gapi.client.init({apiKey:GOOGLE_API_KEY,discoveryDocs:[DISCOVERY_DOC]});
+          gapiInited=true;
+          maybeEnableGoogleButtons();
+        });
       }catch(error){
         console.error(error);
         setStatus("Google API kon niet starten. Controleer Google Cloud: API key restrictions en Calendar API.");
       }
-    }
-    function gisLoaded(){gisInited=true;maybeEnableGoogleButtons();}
+    };
+
+    window.onGisReady = function onGisReady(){
+      gisInited=true;
+      maybeEnableGoogleButtons();
+    };
+
+    if(window.__gapiLoaded){window.initializeGapiClient();}
+    if(window.__gisLoaded){window.onGisReady();}
 
     function maybeEnableGoogleButtons(){
       const authorizeButton=document.getElementById("authorizeButton");
@@ -391,12 +404,7 @@
         return;
       }
 
-      tokenClient=google.accounts.oauth2.initTokenClient({
-        client_id:GOOGLE_CLIENT_ID,
-        scope:SCOPES,
-        callback:""
-      });
-
+      tokenClient=google.accounts.oauth2.initTokenClient({client_id:GOOGLE_CLIENT_ID,scope:SCOPES,callback:""});
       authorizeButton.textContent=state.googleConnected?"Google verbonden":"Inloggen met Google";
       setStatus(state.googleConnected ? "Google is verbonden. Kies hieronder je agenda's." : "Klaar om in te loggen met Google.");
       renderCalendarList();
@@ -407,7 +415,6 @@
         alert("Google is nog niet klaar. Wacht enkele seconden en probeer opnieuw. Controleer ook of https://spagencybe.github.io bij Authorized JavaScript origins staat.");
         return;
       }
-
       tokenClient.callback=async(resp)=>{
         if(resp.error!==undefined){
           console.error(resp);
@@ -419,7 +426,6 @@
         maybeEnableGoogleButtons();
         await loadCalendarList();
       };
-
       tokenClient.requestAccessToken({prompt:"consent"});
     }
 
@@ -441,20 +447,13 @@
       if(!state.googleConnected){handleAuthClick();return;}
       try{
         setStatus("Agenda's ophalen...");
-        const response=await gapi.client.calendar.calendarList.list({minAccessRole:"reader", showHidden:false});
+        const response=await gapi.client.calendar.calendarList.list({minAccessRole:"reader",showHidden:false});
         const calendars=response.result.items||[];
-        state.calendarList=calendars.map(cal=>({
-          id:cal.id,
-          summary:cal.summaryOverride||cal.summary||cal.id,
-          primary:!!cal.primary,
-          backgroundColor:cal.backgroundColor||"#5cc8ff"
-        }));
-
+        state.calendarList=calendars.map(cal=>({id:cal.id,summary:cal.summaryOverride||cal.summary||cal.id,primary:!!cal.primary,backgroundColor:cal.backgroundColor||"#5cc8ff"}));
         if(!state.selectedCalendarIds.length){
           const primary=state.calendarList.find(c=>c.primary);
           state.selectedCalendarIds=primary?[primary.id]:state.calendarList.slice(0,1).map(c=>c.id);
         }
-
         saveState();
         renderCalendarList();
         await loadSelectedCalendarEvents();
@@ -469,27 +468,12 @@
     function renderCalendarList(){
       const container=document.getElementById("calendarList");
       if(!container)return;
-      if(!state.googleConnected){
-        container.innerHTML=`<div class="settings-help">Log eerst in met Google.</div>`;
-        return;
-      }
-      if(!state.calendarList.length){
-        container.innerHTML=`<div class="settings-help">Klik op <strong>Agenda's ophalen</strong> om je Google Agenda's te tonen.</div>`;
-        return;
-      }
-
+      if(!state.googleConnected){container.innerHTML=`<div class="settings-help">Log eerst in met Google.</div>`;return;}
+      if(!state.calendarList.length){container.innerHTML=`<div class="settings-help">Klik op <strong>Agenda's ophalen</strong> om je Google Agenda's te tonen.</div>`;return;}
       container.innerHTML=state.calendarList.map(cal=>{
         const checked=state.selectedCalendarIds.includes(cal.id)?"checked":"";
         const label=cal.primary?`${escapeHtml(cal.summary)} · hoofdagenda`:escapeHtml(cal.summary);
-        return `
-          <label class="calendar-row">
-            <input type="checkbox" value="${escapeHtml(cal.id)}" ${checked} onchange="saveSelectedCalendarsFromUI()" />
-            <div>
-              <div class="calendar-name">${label}</div>
-              <div class="calendar-id">${escapeHtml(cal.id)}</div>
-            </div>
-          </label>
-        `;
+        return `<label class="calendar-row"><input type="checkbox" value="${escapeHtml(cal.id)}" ${checked} onchange="saveSelectedCalendarsFromUI()" /><div><div class="calendar-name">${label}</div><div class="calendar-id">${escapeHtml(cal.id)}</div></div></label>`;
       }).join("");
     }
 
@@ -508,44 +492,21 @@
 
     async function loadSelectedCalendarEvents(){
       if(!state.googleConnected){return;}
-      if(!state.selectedCalendarIds.length){
-        state.googleEvents=[];
-        saveState();
-        renderAll();
-        setStatus("Geen agenda geselecteerd.");
-        return;
-      }
-
+      if(!state.selectedCalendarIds.length){state.googleEvents=[];saveState();renderAll();setStatus("Geen agenda geselecteerd.");return;}
       const start=startOfDay(new Date());
       const end=addDays(start,5);
       const all=[];
-
       try{
         setStatus("Afspraken laden...");
         for(const calendarId of state.selectedCalendarIds){
           const calendarMeta=state.calendarList.find(c=>c.id===calendarId);
-          const response=await gapi.client.calendar.events.list({
-            calendarId,
-            timeMin:start.toISOString(),
-            timeMax:end.toISOString(),
-            showDeleted:false,
-            singleEvents:true,
-            maxResults:40,
-            orderBy:"startTime"
-          });
+          const response=await gapi.client.calendar.events.list({calendarId,timeMin:start.toISOString(),timeMax:end.toISOString(),showDeleted:false,singleEvents:true,maxResults:40,orderBy:"startTime"});
           const events=response.result.items||[];
           all.push(...events.map(event=>{
             const startValue=event.start.dateTime||event.start.date;
             const isAllDay=!event.start.dateTime;
             const date=new Date(startValue);
-            return {
-              dateKey:toDateKey(date),
-              time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),
-              title:event.summary||"Geen titel",
-              person:calendarMeta?.summary||"Google Calendar",
-              color:colorForTitle(`${event.summary||""} ${calendarMeta?.summary||""}`),
-              google:true
-            };
+            return {dateKey:toDateKey(date),time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),title:event.summary||"Geen titel",person:calendarMeta?.summary||"Google Calendar",color:colorForTitle(`${event.summary||""} ${calendarMeta?.summary||""}`),google:true};
           }));
         }
         state.googleEvents=all;
@@ -559,10 +520,7 @@
       }
     }
 
-    function setStatus(message){
-      const el=document.getElementById("googleStatus");
-      if(el)el.textContent=message;
-    }
+    function setStatus(message){const el=document.getElementById("googleStatus");if(el)el.textContent=message;}
 
     function updateClock(){
       const now=new Date();
@@ -617,27 +575,29 @@
         document.getElementById("weatherCondition").textContent=weatherLabel(data.current.weather_code);
         const days=(data.daily?.time||[]).slice(1,4).map((date,idx)=>`${new Date(date).toLocaleDateString("nl-BE",{weekday:"short"})} ${Math.round(data.daily.temperature_2m_max[idx+1])}°`).map(x=>`<span>${x}</span>`).join("");
         document.getElementById("weatherMini").innerHTML=days||`<span>${temp}°</span>`;
-      }catch(e){document.getElementById("weatherTemp").textContent="--°";document.getElementById("weatherCondition").textContent="Niet beschikbaar";}
+      }catch(e){
+        document.getElementById("weatherTemp").textContent="--°";
+        document.getElementById("weatherCondition").textContent="Niet beschikbaar";
+      }
     }
 
     function weatherLabel(code){if([0].includes(code))return"Zonnig";if([1,2].includes(code))return"Licht bewolkt";if([3].includes(code))return"Bewolkt";if([45,48].includes(code))return"Mist";if([51,53,55,61,63,65,80,81,82].includes(code))return"Regen";if([71,73,75,77,85,86].includes(code))return"Sneeuw";if([95,96,99].includes(code))return"Onweer";return"Weer";}
     function colorForTitle(title){const l=title.toLowerCase();if(l.includes("alexis"))return"blue";if(l.includes("amylia"))return"purple";if(l.includes("louize"))return"orange";if(l.includes("hannah"))return"green";if(l.includes("loïc")||l.includes("loic"))return"red";if(l.includes("werk"))return"blue";if(l.includes("school"))return"orange";return"green";}
 
-    function renderList(type){const list=document.getElementById(type==="tasks"?"taskList":"shoppingList");list.innerHTML=state[type].map((item,index)=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('${type}',${index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('${type}',${index})">×</button></div>`).join("");}
+    function renderList(type){
+      const list=document.getElementById(type==="tasks"?"taskList":"shoppingList");
+      if(!list)return;
+      list.innerHTML=state[type].map((item,index)=>`<div class="mini-item ${item.done?"done":""}"><button class="check" onclick="toggleItem('${type}',${index})">${item.done?"✓":""}</button><div class="mini-text">${escapeHtml(item.text)}</div><button class="delete" onclick="deleteItem('${type}',${index})">×</button></div>`).join("");
+    }
 
     function renderWeekMenu(){
       const container=document.getElementById("weekMenuList");
       if(!container)return;
-      const days=[
-        ["ma","Ma"],["di","Di"],["wo","Wo"],["do","Do"],["vr","Vr"],["za","Za"],["zo","Zo"]
-      ];
+      const baseDays=[["ma","Ma"],["di","Di"],["wo","Wo"],["do","Do"],["vr","Vr"],["za","Za"],["zo","Zo"]];
+      const todayIndex=(new Date().getDay()+6)%7;
+      const days=[...baseDays.slice(todayIndex),...baseDays.slice(0,todayIndex)];
       if(!state.weekMenu){state.weekMenu={};}
-      container.innerHTML=days.map(([key,label])=>`
-        <div class="meal-row">
-          <div class="meal-day">${label}</div>
-          <input class="meal-input" value="${escapeHtml(state.weekMenu[key]||"")}" placeholder="Menu invullen" oninput="updateMeal('${key}', this.value)" />
-        </div>
-      `).join("");
+      container.innerHTML=days.map(([key,label])=>`<div class="meal-row"><div class="meal-day">${label}</div><input class="meal-input" value="${escapeHtml(state.weekMenu[key]||"")}" placeholder="Menu invullen" oninput="updateMeal('${key}', this.value)" /></div>`).join("");
     }
 
     function updateMeal(day,value){
@@ -646,14 +606,26 @@
       saveState();
       syncCloudWeekMenu();
     }
-    function addItem(type){const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");const text=input.value.trim();if(!text)return;state[type].push({text,done:false});input.value="";saveState();renderList(type);syncCloudCollection(type);}
+
+    function addItem(type){
+      const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");
+      const text=input.value.trim();
+      if(!text)return;
+      state[type].push({text,done:false});
+      input.value="";
+      saveState();
+      renderList(type);
+      syncCloudCollection(type);
+    }
     function toggleItem(type,index){state[type][index].done=!state[type][index].done;saveState();renderList(type);syncCloudCollection(type);}
     function deleteItem(type,index){state[type].splice(index,1);saveState();renderList(type);syncCloudCollection(type);}
 
     function setupInputs(){
       document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("tasks");});
       document.getElementById("shoppingInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("shopping");});
-      const notes=document.getElementById("notes");notes.value=state.notes||"";notes.addEventListener("input",()=>{state.notes=notes.value;saveState();});
+      const notes=document.getElementById("notes");
+      notes.value=state.notes||"";
+      notes.addEventListener("input",()=>{state.notes=notes.value;saveState();});
     }
 
     function setupSettings(){
@@ -667,7 +639,7 @@
       saveState();
       updateWeather();
       renderAll();
-      if(closePanel) setStatus("Instellingen opgeslagen.");
+      if(closePanel)setStatus("Instellingen opgeslagen.");
     }
 
     function toggleSettings(forceOpen){
@@ -683,7 +655,29 @@
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 
-    function init(){updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
+    function runSmokeTests(){
+      console.assert(typeof window.gisLoaded === "function", "gisLoaded moet globaal bestaan vóór het GIS-script laadt.");
+      console.assert(typeof window.gapiLoaded === "function", "gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");
+      console.assert(toDateKey(new Date("2026-05-04T12:00:00")) === "2026-05-04", "toDateKey moet YYYY-MM-DD teruggeven.");
+      console.assert(weatherLabel(0) === "Zonnig", "weatherLabel(0) moet Zonnig zijn.");
+      console.assert(colorForTitle("Training Alexis") === "blue", "Alexis events moeten blauw zijn.");
+    }
+
+    function init(){
+      runSmokeTests();
+      updateClock();
+      setupInputs();
+      setupSettings();
+      renderAll();
+      renderCalendarList();
+      updateWeather();
+      initFirebaseSync();
+      maybeEnableGoogleButtons();
+      setInterval(updateClock,1000);
+      setInterval(updateWeather,15*60*1000);
+      setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);
+    }
+
     init();
   </script>
 </body>
