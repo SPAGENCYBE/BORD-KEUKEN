@@ -147,11 +147,8 @@
 
     .month-dashboard{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:18px;backdrop-filter:blur(2px);}
     .month-top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;}
-    .month-title-block h1{display:none;}
-    .news-strip{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:center;width:min(980px,68vw);max-width:68vw;margin-top:0;overflow:hidden;padding:16px 18px;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,0.11),rgba(255,255,255,0.045));border:1px solid rgba(255,255,255,0.13);box-shadow:0 18px 50px rgba(0,0,0,.24);backdrop-filter:blur(16px);}
-    .news-source{flex-shrink:0;font-size:13px;text-transform:uppercase;letter-spacing:.16em;color:#061018;font-weight:950;background:linear-gradient(135deg,#5cc8ff,#3ddc97);border-radius:999px;padding:9px 12px;box-shadow:0 12px 28px rgba(92,200,255,.18);}
-    .news-headline{font-size:clamp(22px,2.2vw,36px);color:#fff;font-weight:850;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 14px 36px rgba(0,0,0,.42);letter-spacing:-.035em;}
-    .news-headline a{color:inherit;text-decoration:none;}
+    .month-title-block h1{font-size:42px;line-height:.95;font-weight:260;letter-spacing:-.06em;margin:0;}
+    .month-title-block p{margin-top:8px;color:var(--muted);font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;}
     .month-nav{display:flex;gap:8px;align-items:center;}
     .month-nav button{border:0;border-radius:14px;min-height:40px;padding:0 14px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.14);color:#fff;font-weight:900;}
     .month-layout{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;}
@@ -189,7 +186,7 @@
     .calendar-name{font-weight:850;font-size:14px;}
     .calendar-id{font-size:11px;color:rgba(255,255,255,0.48);margin-top:2px;word-break:break-all;}
 
-    @media (max-width:1350px){html,body{overflow:auto;}.swipe-pages{height:auto;min-height:100vh;}.page{height:auto;min-height:100vh;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{height:520px;grid-auto-columns:minmax(260px,48vw);}.bottom{grid-template-columns:repeat(2,1fr);}.month-layout{grid-template-columns:1fr;}.month
+    @media (max-width:1350px){html,body{overflow:auto;}.swipe-pages{height:auto;min-height:100vh;}.page{height:auto;min-height:100vh;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{height:520px;grid-auto-columns:minmax(260px,48vw);}.bottom{grid-template-columns:repeat(2,1fr);}.month-layout{grid-template-columns:1fr;}.month-grid{grid-auto-rows:92px;}.general-card{min-height:320px;}}
     @media (max-width:780px){
       html,body{
         overflow:auto;
@@ -535,11 +532,8 @@
       <main class="month-dashboard">
         <header class="month-top">
           <div class="month-title-block">
-            <h1></h1>
-            <div class="news-strip">
-              <div class="news-source">HLN</div>
-              <div id="hlnHeadline" class="news-headline">Nieuws laden...</div>
-            </div>
+            <h1>Algemeen</h1>
+            <p>Maandoverzicht gezin & planning</p>
           </div>
           <div class="month-nav">
             <button onclick="changeMonth(-1)">‹</button>
@@ -629,9 +623,6 @@
     let gisInited = false;
     let weekMenuSyncTimer = null;
     let monthViewDate = new Date();
-    let hlnNewsItems = [];
-    let hlnNewsIndex = 0;
-    let hlnNewsTimer = null;
 
     const state = loadState();
 
@@ -976,47 +967,6 @@
       renderMonthCalendar();
     }
 
-    async function loadHLNNews(){
-      const target=document.getElementById("hlnHeadline");
-      if(!target)return;
-
-      const rssUrl="https://www.hln.be/home/rss.xml";
-      const proxyUrl=`https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
-
-      try{
-        const res=await fetch(proxyUrl,{cache:"no-store"});
-        if(!res.ok)throw new Error("HLN RSS niet bereikbaar");
-        const xmlText=await res.text();
-        const xml=new DOMParser().parseFromString(xmlText,"text/xml");
-        const items=[...xml.querySelectorAll("item")].slice(0,10).map(item=>({
-          title:item.querySelector("title")?.textContent?.trim()||"Nieuwsitem",
-          link:item.querySelector("link")?.textContent?.trim()||"https://www.hln.be/"
-        })).filter(item=>item.title);
-
-        hlnNewsItems=items;
-        hlnNewsIndex=0;
-        renderHLNHeadline();
-
-        clearInterval(hlnNewsTimer);
-        hlnNewsTimer=setInterval(()=>{
-          if(!hlnNewsItems.length)return;
-          hlnNewsIndex=(hlnNewsIndex+1)%hlnNewsItems.length;
-          renderHLNHeadline();
-        },9000);
-      }catch(error){
-        console.error("HLN nieuws laden mislukt:",error);
-        target.textContent="HLN nieuws tijdelijk niet beschikbaar";
-      }
-    }
-
-    function renderHLNHeadline(){
-      const target=document.getElementById("hlnHeadline");
-      if(!target)return;
-      const item=hlnNewsItems[hlnNewsIndex];
-      if(!item){target.textContent="Geen HLN nieuws gevonden";return;}
-      target.innerHTML=`<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>`;
-    }
-
     async function updateWeather(){
       document.getElementById("weatherCity").textContent=state.city;
       const cities={"dendermonde":{lat:51.03,lon:4.10},"wieze":{lat:50.98,lon:4.10},"deiremonne":{lat:51.03,lon:4.10},"asse":{lat:50.91,lon:4.20},"antwerpen":{lat:51.22,lon:4.40},"brussel":{lat:50.85,lon:4.35},"gent":{lat:51.05,lon:3.72}};
@@ -1218,14 +1168,12 @@
       setupSettings();
       renderAll();
       renderCalendarList();
-      loadHLNNews();
       applyWeatherTheme(1);
       updateWeather();
       initFirebaseSync();
       maybeEnableGoogleButtons();
       setInterval(updateClock,1000);
       setInterval(updateWeather,15*60*1000);
-      setInterval(loadHLNNews,30*60*1000);
       setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);
     }
 
