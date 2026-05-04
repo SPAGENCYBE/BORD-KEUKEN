@@ -77,9 +77,10 @@
     .date{margin-top:10px;font-size:24px;font-weight:700;text-transform:capitalize;}
     .subdate{margin-top:4px;font-size:14px;color:var(--muted);text-transform:capitalize;font-weight:700;}
 
-    .middle{min-height:0;}
-    .week-grid{height:100%;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;}
-    .day-column{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;min-height:0;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
+    .middle{min-height:0;overflow:hidden;}
+    .week-grid{height:100%;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(255px,calc((100% - 56px) / 5));grid-template-columns:none;gap:14px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x proximity;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-x;}
+    .week-grid::-webkit-scrollbar{display:none;}
+    .day-column{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;min-height:0;box-shadow:var(--shadow);backdrop-filter:blur(16px);scroll-snap-align:start;}
     .day-header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.10);flex-shrink:0;}
     .day-left{display:flex;align-items:baseline;gap:10px;}
     .day-number{font-size:42px;line-height:.9;font-weight:250;letter-spacing:-0.08em;}
@@ -120,12 +121,20 @@
     .meal-input{width:100%;border:0!important;background:transparent!important;color:#fff!important;padding:0!important;border-radius:0!important;font-size:14px;font-weight:800;outline:none;}
     .meal-input::placeholder{color:rgba(255,255,255,0.34);}
 
-    .weather{background:linear-gradient(160deg,rgba(48,200,116,0.95),rgba(20,132,98,0.92));justify-content:space-between;position:relative;overflow:hidden;}
-    .weather::after{content:"";position:absolute;width:120px;height:120px;border-radius:999px;background:rgba(255,255,255,0.16);right:-30px;top:-35px;}
-    .weather-temp{font-size:62px;line-height:.9;font-weight:250;letter-spacing:-0.08em;position:relative;z-index:1;}
-    .weather-city{margin-top:8px;font-size:17px;font-weight:900;position:relative;z-index:1;}
-    .weather-condition{margin-top:3px;font-size:13px;color:rgba(255,255,255,0.76);font-weight:700;position:relative;z-index:1;}
-    .weather-mini{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;font-weight:800;color:rgba(255,255,255,0.82);position:relative;z-index:1;}
+    .weather{justify-content:space-between;position:relative;overflow:hidden;background-size:cover;background-position:center;background-repeat:no-repeat;transition:background-image .35s ease;border:1px solid rgba(255,255,255,0.12);}
+    .weather::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,18,0.16),rgba(5,10,18,0.50));z-index:0;}
+    .weather::after{content:"";position:absolute;width:120px;height:120px;border-radius:999px;background:rgba(255,255,255,0.14);right:-30px;top:-35px;z-index:0;}
+    .weather>*{position:relative;z-index:1;}
+    .weather.sunny{background-image:linear-gradient(160deg,rgba(255,195,0,0.10),rgba(20,120,98,0.12)),url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80');}
+    .weather.cloudy{background-image:linear-gradient(160deg,rgba(90,110,140,0.16),rgba(30,50,70,0.22)),url('https://images.unsplash.com/photo-1499346030926-9a72daac6c63?auto=format&fit=crop&w=1200&q=80');}
+    .weather.rain{background-image:linear-gradient(160deg,rgba(40,70,100,0.22),rgba(8,20,35,0.35)),url('https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=1200&q=80');}
+    .weather.fog{background-image:linear-gradient(160deg,rgba(120,130,140,0.18),rgba(40,45,55,0.28)),url('https://images.unsplash.com/photo-1487621167305-5d248087c724?auto=format&fit=crop&w=1200&q=80');}
+    .weather.snow{background-image:linear-gradient(160deg,rgba(180,200,220,0.12),rgba(40,60,90,0.20)),url('https://images.unsplash.com/photo-1483664852095-d6cc6870702d?auto=format&fit=crop&w=1200&q=80');}
+    .weather.storm{background-image:linear-gradient(160deg,rgba(25,25,40,0.20),rgba(5,8,18,0.38)),url('https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80');}
+    .weather-temp{font-size:62px;line-height:.9;font-weight:250;letter-spacing:-0.08em;position:relative;z-index:1;text-shadow:0 12px 32px rgba(0,0,0,0.42);}
+    .weather-city{margin-top:8px;font-size:17px;font-weight:900;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
+    .weather-condition{margin-top:3px;font-size:13px;color:rgba(255,255,255,0.82);font-weight:800;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
+    .weather-mini{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;font-size:11px;font-weight:900;color:rgba(255,255,255,0.88);position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
 
     .settings{position:fixed;right:22px;bottom:22px;z-index:40;opacity:0;transition:opacity .22s ease, transform .22s ease;transform:translateY(8px);}
     .settings:hover,.settings:focus-within{opacity:1;transform:translateY(0);}
@@ -142,27 +151,30 @@
     .calendar-name{font-weight:850;font-size:14px;}
     .calendar-id{font-size:11px;color:rgba(255,255,255,0.48);margin-top:2px;word-break:break-all;}
 
-    @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{grid-template-columns:repeat(2,1fr);}.bottom{grid-template-columns:repeat(2,1fr);}}
+    @media (max-width:1350px){html,body{overflow:auto;}.app{height:auto;min-height:100%;grid-template-rows:auto auto auto;}.top{grid-template-columns:1fr;}.clock-box{text-align:left;}.family-strip{grid-template-columns:repeat(3,1fr);}.week-grid{height:520px;grid-auto-columns:minmax(260px,48vw);}.bottom{grid-template-columns:repeat(2,1fr);}}
     @media (max-width:780px){
       html,body{overflow:auto;background:#071019;}
       body{background-image:linear-gradient(180deg,rgba(5,10,18,0.96),rgba(5,10,18,0.94)),url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');}
       .app{height:auto;min-height:100vh;padding:14px;display:block;}
       .top,.middle,.bottom .panel:nth-child(2),.bottom .panel:nth-child(4),.weather{display:none!important;}
       .bottom{display:grid!important;grid-template-columns:1fr!important;gap:14px!important;}
-      .bottom .panel:first-child{display:flex!important;height:58vh;min-height:0;border-radius:22px;padding:18px;overflow:hidden;}
-      .bottom .panel:nth-child(3){display:flex!important;height:38vh;min-height:0;border-radius:22px;padding:18px;overflow:hidden;}
-      .bottom .panel:first-child .panel-title,.bottom .panel:nth-child(3) .panel-title{font-size:16px;margin-bottom:16px;}
-      .panel-top{grid-template-columns:1fr 54px;gap:10px;margin-bottom:14px;}
-      .panel input{font-size:18px;padding:16px;border-radius:16px;}
-      .panel button{min-height:54px;border-radius:16px;font-size:22px;}
-      .mini-list,.weekmenu-list{gap:10px;overflow:auto;min-height:0;flex:1;scrollbar-width:none;-ms-overflow-style:none;}
-      .mini-item{padding:14px 12px;border-radius:16px;grid-template-columns:36px 1fr 36px;}
-      .check{width:34px;height:34px;border-radius:12px;font-size:18px;}
-      .mini-text{font-size:18px;}
-      .delete{width:34px;height:34px;border-radius:12px;font-size:22px;}
-      .settings{right:14px;bottom:14px;opacity:.18;transform:none;}
-      .floating{width:50px;height:50px;font-size:20px;}
-      .settings-panel{right:0;bottom:62px;width:calc(100vw - 28px);}
+      .bottom .panel:first-child{display:flex!important;height:55vh;min-height:0;border-radius:18px;padding:14px;overflow:hidden;}
+      .bottom .panel:nth-child(3){display:flex!important;height:40vh;min-height:0;border-radius:18px;padding:14px;overflow:hidden;}
+      .bottom .panel:first-child .panel-title,.bottom .panel:nth-child(3) .panel-title{font-size:13px;margin-bottom:10px;}
+      .panel-top{grid-template-columns:1fr 44px;gap:8px;margin-bottom:10px;}
+      .panel input{font-size:15px;padding:11px 12px;border-radius:13px;}
+      .panel button{min-height:42px;border-radius:13px;font-size:18px;}
+      .mini-list,.weekmenu-list{gap:7px;overflow:auto;min-height:0;flex:1;scrollbar-width:none;-ms-overflow-style:none;}
+      .mini-item{padding:9px 10px;border-radius:12px;grid-template-columns:28px 1fr 28px;}
+      .check{width:27px;height:27px;border-radius:9px;font-size:14px;}
+      .mini-text{font-size:15px;}
+      .delete{width:27px;height:27px;border-radius:9px;font-size:18px;}
+      .settings{right:10px;bottom:10px;opacity:.16;transform:none;}
+      .floating{width:42px;height:42px;font-size:17px;}
+      .settings-panel{right:0;bottom:52px;width:calc(100vw - 20px);} 
+      .meal-row{grid-template-columns:34px 1fr;padding:7px 9px;border-radius:11px;}
+      .meal-day{font-size:10px;}
+      .meal-input{font-size:14px!important;}
     }
   </style>
 </head>
@@ -271,6 +283,7 @@
     let tokenClient = null;
     let gapiInited = false;
     let gisInited = false;
+    let weekMenuSyncTimer = null;
 
     const state = loadState();
 
@@ -494,7 +507,7 @@
       if(!state.googleConnected){return;}
       if(!state.selectedCalendarIds.length){state.googleEvents=[];saveState();renderAll();setStatus("Geen agenda geselecteerd.");return;}
       const start=startOfDay(new Date());
-      const end=addDays(start,5);
+      const end=addDays(start,14);
       const all=[];
       try{
         setStatus("Afspraken laden...");
@@ -551,7 +564,7 @@
       const grid=document.getElementById("weekGrid");
       const today=startOfDay(new Date());
       const events=getAllEvents();
-      grid.innerHTML=Array.from({length:5},(_,i)=>{
+      grid.innerHTML=Array.from({length:14},(_,i)=>{
         const date=addDays(today,i);
         const key=toDateKey(date);
         const num=date.toLocaleDateString("nl-BE",{day:"2-digit"});
@@ -573,15 +586,19 @@
         const temp=Math.round(data.current.temperature_2m);
         document.getElementById("weatherTemp").textContent=`${temp}°`;
         document.getElementById("weatherCondition").textContent=weatherLabel(data.current.weather_code);
+        applyWeatherTheme(data.current.weather_code);
         const days=(data.daily?.time||[]).slice(1,4).map((date,idx)=>`${new Date(date).toLocaleDateString("nl-BE",{weekday:"short"})} ${Math.round(data.daily.temperature_2m_max[idx+1])}°`).map(x=>`<span>${x}</span>`).join("");
         document.getElementById("weatherMini").innerHTML=days||`<span>${temp}°</span>`;
       }catch(e){
         document.getElementById("weatherTemp").textContent="--°";
         document.getElementById("weatherCondition").textContent="Niet beschikbaar";
+        applyWeatherTheme(1);
       }
     }
 
     function weatherLabel(code){if([0].includes(code))return"Zonnig";if([1,2].includes(code))return"Licht bewolkt";if([3].includes(code))return"Bewolkt";if([45,48].includes(code))return"Mist";if([51,53,55,61,63,65,80,81,82].includes(code))return"Regen";if([71,73,75,77,85,86].includes(code))return"Sneeuw";if([95,96,99].includes(code))return"Onweer";return"Weer";}
+    function getWeatherTheme(code){if([0].includes(code))return"sunny";if([1,2,3].includes(code))return"cloudy";if([45,48].includes(code))return"fog";if([51,53,55,61,63,65,80,81,82].includes(code))return"rain";if([71,73,75,77,85,86].includes(code))return"snow";if([95,96,99].includes(code))return"storm";return"cloudy";}
+    function applyWeatherTheme(code){const box=document.querySelector(".weather");if(!box)return;box.classList.remove("sunny","cloudy","rain","fog","snow","storm");box.classList.add(getWeatherTheme(code));}
     function colorForTitle(title){const l=title.toLowerCase();if(l.includes("alexis"))return"blue";if(l.includes("amylia"))return"purple";if(l.includes("louize"))return"orange";if(l.includes("hannah"))return"green";if(l.includes("loïc")||l.includes("loic"))return"red";if(l.includes("werk"))return"blue";if(l.includes("school"))return"orange";return"green";}
 
     function renderList(type){
@@ -604,7 +621,8 @@
       if(!state.weekMenu)state.weekMenu={};
       state.weekMenu[day]=value;
       saveState();
-      syncCloudWeekMenu();
+      clearTimeout(weekMenuSyncTimer);
+      weekMenuSyncTimer=setTimeout(()=>syncCloudWeekMenu(),700);
     }
 
     function addItem(type){
@@ -660,6 +678,8 @@
       console.assert(typeof window.gapiLoaded === "function", "gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");
       console.assert(toDateKey(new Date("2026-05-04T12:00:00")) === "2026-05-04", "toDateKey moet YYYY-MM-DD teruggeven.");
       console.assert(weatherLabel(0) === "Zonnig", "weatherLabel(0) moet Zonnig zijn.");
+      console.assert(getWeatherTheme(0) === "sunny", "Weercode 0 moet sunny theme geven.");
+      console.assert(getWeatherTheme(61) === "rain", "Weercode 61 moet rain theme geven.");
       console.assert(colorForTitle("Training Alexis") === "blue", "Alexis events moeten blauw zijn.");
     }
 
@@ -670,6 +690,7 @@
       setupSettings();
       renderAll();
       renderCalendarList();
+      applyWeatherTheme(1);
       updateWeather();
       initFirebaseSync();
       maybeEnableGoogleButtons();
