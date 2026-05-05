@@ -92,7 +92,7 @@
     .event-person{margin-top:2px;font-size:10px;color:var(--soft);font-weight:700;}
     .empty{color:var(--soft);font-size:14px;font-weight:700;padding-top:6px;}
 
-    .bottom{display:grid;grid-template-columns:1.15fr 1.15fr 1fr 0.92fr 230px;gap:14px;align-items:stretch;min-height:0;overflow:hidden;}
+    .bottom{display:grid;grid-template-columns:1.12fr 1.12fr 1.12fr 0.92fr 280px;gap:14px;align-items:stretch;min-height:0;overflow:hidden;}
     .panel,.weather{background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:16px;display:flex;flex-direction:column;min-height:0;overflow:hidden;}
     .panel-title{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:900;margin-bottom:9px;}
     .panel-top{display:grid;grid-template-columns:1fr auto;gap:7px;margin-bottom:8px;}
@@ -137,6 +137,20 @@
     .weather-city{margin-top:6px;font-size:14px;font-weight:900;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
     .weather-condition{margin-top:2px;font-size:11px;color:rgba(255,255,255,0.82);font-weight:800;position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
     .weather-mini{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;font-size:9px;font-weight:900;color:rgba(255,255,255,0.88);position:relative;z-index:1;text-shadow:0 8px 22px rgba(0,0,0,0.35);}
+    .weather-tado{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.18);position:relative;z-index:1;}
+    .weather-tado-title{font-size:9px;text-transform:uppercase;letter-spacing:.13em;font-weight:950;color:rgba(255,255,255,.68);margin-bottom:8px;text-shadow:0 8px 22px rgba(0,0,0,.35);}
+    .weather-tado-temp{font-size:34px;line-height:.9;font-weight:260;letter-spacing:-.07em;margin-bottom:8px;text-shadow:0 12px 32px rgba(0,0,0,.42);}
+    .weather-tado-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .weather-tado-chip{background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:7px 8px;min-width:0;}
+    .weather-tado-chip span{display:block;font-size:8px;text-transform:uppercase;letter-spacing:.11em;color:rgba(255,255,255,.54);font-weight:950;margin-bottom:2px;}
+    .weather-tado-chip strong{display:block;font-size:11px;color:#fff;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .weather-tado-status{margin-top:7px;font-size:9px;font-weight:900;color:rgba(255,255,255,.55);}
+
+    .tado-card{background:linear-gradient(180deg,rgba(92,200,255,0.12),rgba(255,255,255,0.04));}
+    .tado-temp{font-size:38px;line-height:.9;font-weight:260;letter-spacing:-.07em;margin-bottom:10px;}
+    .tado-line{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:850;color:rgba(255,255,255,.82);padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07);}
+    .tado-line span:first-child{color:rgba(255,255,255,.52);text-transform:uppercase;letter-spacing:.08em;font-size:9px;}
+    .tado-status{margin-top:auto;font-size:10px;font-weight:900;color:rgba(255,255,255,.56);}
 
     .month-dashboard{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:18px;backdrop-filter:blur(2px);}
     .month-top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;}
@@ -298,6 +312,17 @@
               <div id="weatherCondition" class="weather-condition">weer laden</div>
             </div>
             <div id="weatherMini" class="weather-mini"><span>laden...</span></div>
+            <div class="weather-tado">
+              <div class="weather-tado-title">tado° thermostaat</div>
+              <div id="tadoTemp" class="weather-tado-temp">--°</div>
+              <div class="weather-tado-grid">
+                <div class="weather-tado-chip"><span>Doel</span><strong id="tadoTarget">--°</strong></div>
+                <div class="weather-tado-chip"><span>Vocht</span><strong id="tadoHumidity">--%</strong></div>
+                <div class="weather-tado-chip"><span>Warmte</span><strong id="tadoHeating">--%</strong></div>
+                <div class="weather-tado-chip"><span>Mode</span><strong id="tadoMode">--</strong></div>
+              </div>
+              <div id="tadoStatus" class="weather-tado-status">Home Assistant niet ingesteld</div>
+            </div>
           </aside>
         </section>
       </main>
@@ -342,7 +367,13 @@
       <label>Basis</label>
       <input id="nameSetting" placeholder="Naam, bv. Carlos" />
       <input id="citySetting" placeholder="Stad voor weer, bv. Dendermonde" />
-<label>Google Agenda zoals DAKboard</label>
+
+      <label>Home Assistant / tado°</label>
+      <input id="haUrlSetting" placeholder="Home Assistant URL, bv. http://192.168.33.52:8123" />
+      <input id="haTokenSetting" placeholder="Home Assistant token" type="password" />
+      <div class="settings-help">Zet je token hier lokaal in je browser. Plaats deze token nooit rechtstreeks in de GitHub HTML-code.</div>
+
+      <label>Google Agenda zoals DAKboard</label>
       <div id="googleStatus" class="status">Google wordt geladen...</div>
       <div class="settings-actions">
         <button id="authorizeButton" class="btn" onclick="handleAuthClick()">Inloggen met Google</button>
@@ -393,6 +424,7 @@
     let hlnNewsIndex = 0;
     let hlnNewsTimer = null;
 
+    const TADO_ENTITIES={climate:"climate.kamer_1",temperature:"sensor.kamer_1_temperatuur",humidity:"sensor.kamer_1_luchtvochtigheid",heating:"sensor.kamer_1_verwarmen",mode:"sensor.kamer_1_tado_mode"};
     const people = [{name:"Alexis",color:"#5cc8ff"},{name:"Amylia",color:"#b47cff"},{name:"Louize",color:"#ffb24d"},{name:"Hannah",color:"#3ddc97"},{name:"Loïc",color:"#ff6b7d"}];
     const demoEvents = [{day:0,time:"07:30",title:"Werk starten",person:"Carlos",color:"blue"},{day:0,time:"18:00",title:"Samen eten",person:"Gezin",color:"orange"},{day:1,time:"17:00",title:"Turnen",person:"Amylia",color:"purple"},{day:2,time:"16:00",title:"Opvang",person:"Loïc",color:"green"},{day:4,time:"09:00",title:"Boodschappen",person:"Carlos & Steffi",color:"green"}];
     const FALLBACK_HLN_NEWS=[
@@ -403,7 +435,7 @@
     const state = loadState();
 
     function loadState(){
-      const defaults={name:"Carlos",city:"Dendermonde",googleConnected:false,calendarList:[],selectedCalendarIds:[],googleEvents:[],tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],notes:"Niet vergeten: schoolbrief tekenen · vuilnis buitenzetten",weekMenu:{ma:"Spaghetti",di:"Kip met rijst",wo:"Wraps",do:"Puree met vis",vr:"Frietjes",za:"Pizza / makkelijk",zo:"Familie-eten"}};
+      const defaults={name:"Carlos",city:"Dendermonde",googleConnected:false,calendarList:[],selectedCalendarIds:[],googleEvents:[],haUrl:"",haToken:"",tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],notes:"Niet vergeten: schoolbrief tekenen · vuilnis buitenzetten",weekMenu:{ma:"Spaghetti",di:"Kip met rijst",wo:"Wraps",do:"Puree met vis",vr:"Frietjes",za:"Pizza / makkelijk",zo:"Familie-eten"}};
       try{return {...defaults,...(JSON.parse(localStorage.getItem(STORAGE_KEY))||{})};}catch(e){return defaults;}
     }
     function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
@@ -476,6 +508,8 @@
     }
     function parseRssItems(xmlText){const xml=new DOMParser().parseFromString(xmlText,"text/xml");return [...xml.querySelectorAll("item")].map(item=>({title:item.querySelector("title")?.textContent?.trim()||"Nieuwsitem",link:item.querySelector("link")?.textContent?.trim()||"https://www.hln.be/"})).filter(item=>item.title);}
     function renderHLNHeadline(){const target=document.getElementById("hlnHeadline");if(!target)return;const item=hlnNewsItems[hlnNewsIndex];if(!item){target.textContent="Geen HLN nieuws gevonden";return;}target.innerHTML=`<a href="${escapeHtml(item.link)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>`;}
+
+    async function updateTado(){const status=document.getElementById("tadoStatus");if(!state.haUrl||!state.haToken){if(status)status.textContent="Home Assistant niet ingesteld";return;}const base=state.haUrl.replace(/\/$/,"");const headers={Authorization:`Bearer ${state.haToken}`,"Content-Type":"application/json"};async function getState(entityId){const res=await fetch(`${base}/api/states/${entityId}`,{headers});if(!res.ok)throw new Error(`${entityId} niet bereikbaar`);return res.json();}try{const [climate,temp,humidity,heating,mode]=await Promise.all([getState(TADO_ENTITIES.climate),getState(TADO_ENTITIES.temperature),getState(TADO_ENTITIES.humidity),getState(TADO_ENTITIES.heating),getState(TADO_ENTITIES.mode)]);const target=climate?.attributes?.temperature??climate?.attributes?.target_temp_low??"--";document.getElementById("tadoTemp").textContent=`${formatNumber(temp.state)}°`;document.getElementById("tadoTarget").textContent=target==="--"?"--°":`${formatNumber(target)}°`;document.getElementById("tadoHumidity").textContent=`${formatNumber(humidity.state)}%`;document.getElementById("tadoHeating").textContent=`${formatNumber(heating.state)}%`;document.getElementById("tadoMode").textContent=String(mode.state||"--").toUpperCase();if(status)status.textContent="Live via Home Assistant";}catch(error){console.error("tado laden mislukt:",error);if(status)status.textContent="tado niet bereikbaar";}}
     function formatNumber(value){const n=Number(String(value).replace(",","."));if(Number.isNaN(n))return value;return n.toLocaleString("nl-BE",{maximumFractionDigits:1});}
 
     async function updateWeather(){document.getElementById("weatherCity").textContent=state.city;const cities={"dendermonde":{lat:51.03,lon:4.10},"wieze":{lat:50.98,lon:4.10},"deiremonne":{lat:51.03,lon:4.10},"asse":{lat:50.91,lon:4.20},"antwerpen":{lat:51.22,lon:4.40},"brussel":{lat:50.85,lon:4.35},"gent":{lat:51.05,lon:3.72}};const coords=cities[state.city.trim().toLowerCase()]||cities.dendermonde;try{const url=`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max&timezone=Europe%2FBrussels`;const res=await fetch(url);const data=await res.json();const temp=Math.round(data.current.temperature_2m);document.getElementById("weatherTemp").textContent=`${temp}°`;document.getElementById("weatherCondition").textContent=weatherLabel(data.current.weather_code);applyWeatherTheme(data.current.weather_code);const days=(data.daily?.time||[]).slice(1,4).map((date,idx)=>`${new Date(date).toLocaleDateString("nl-BE",{weekday:"short"})} ${Math.round(data.daily.temperature_2m_max[idx+1])}°`).map(x=>`<span>${x}</span>`).join("");document.getElementById("weatherMini").innerHTML=days||`<span>${temp}°</span>`;}catch(e){document.getElementById("weatherTemp").textContent="--°";document.getElementById("weatherCondition").textContent="Niet beschikbaar";applyWeatherTheme(1);}}
@@ -497,8 +531,8 @@
     function deleteItem(type,index){state[type].splice(index,1);saveState();renderList(type);syncCloudCollection(type);}
 
     function setupInputs(){document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("tasks");});document.getElementById("shoppingInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("shopping");});const notes=document.getElementById("notes");notes.value=state.notes||"";notes.addEventListener("input",()=>{state.notes=notes.value;saveState();});}
-    function setupSettings(){document.getElementById("nameSetting").value=state.name;document.getElementById("citySetting").value=state.city;}
-    function saveSettings(closePanel=true){state.name=document.getElementById("nameSetting").value.trim()||"Carlos";state.city=document.getElementById("citySetting").value.trim()||"Dendermonde";saveState();updateWeather();renderAll();if(closePanel)setStatus("Instellingen opgeslagen.");}
+    function setupSettings(){document.getElementById("nameSetting").value=state.name;document.getElementById("citySetting").value=state.city;document.getElementById("haUrlSetting").value=state.haUrl||"";document.getElementById("haTokenSetting").value=state.haToken||"";}
+    function saveSettings(closePanel=true){state.name=document.getElementById("nameSetting").value.trim()||"Carlos";state.city=document.getElementById("citySetting").value.trim()||"Dendermonde";state.haUrl=document.getElementById("haUrlSetting").value.trim();state.haToken=document.getElementById("haTokenSetting").value.trim();saveState();updateWeather();updateTado();renderAll();if(closePanel)setStatus("Instellingen opgeslagen.");}
     function toggleSettings(forceOpen){const panel=document.getElementById("settings");if(forceOpen===true)panel.classList.add("open");else panel.classList.toggle("open");renderCalendarList();maybeEnableGoogleButtons();}
 
     function startOfDay(date){const d=new Date(date);d.setHours(0,0,0,0);return d;}
@@ -510,7 +544,7 @@
 
     function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");}
 
-    function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
+    function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();updateTado();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(updateTado,2*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
     init();
   </script>
 </body>
