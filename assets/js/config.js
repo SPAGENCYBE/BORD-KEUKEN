@@ -6,7 +6,8 @@ const DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v
 const SCOPES = [
   "https://www.googleapis.com/auth/calendar.readonly",
   "https://www.googleapis.com/auth/classroom.courses.readonly",
-  "https://www.googleapis.com/auth/classroom.coursework.me.readonly"
+  "https://www.googleapis.com/auth/classroom.coursework.me.readonly",
+  "https://www.googleapis.com/auth/classroom.student-submissions.me.readonly"
 ].join(" ");
 
 const FIREBASE_CONFIG = {

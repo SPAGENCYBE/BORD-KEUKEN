@@ -113,11 +113,7 @@
             <h1>Huiswerk & schooltaken</h1>
             <p>Amylia en Alexis · overzicht per kind</p>
           </div>
-          <div class="homework-actions">
-            <button onclick="connectClassroom('amylia')">Classroom Amylia</button>
-            <button onclick="connectClassroom('alexis')">Classroom Alexis</button>
-            <button onclick="clearImportedHomework()">Imports wissen</button>
-          </div>
+
         </header>
 
         <section class="homework-grid">
@@ -143,6 +139,17 @@
             <div id="alexisHomeworkList" class="homework-list"></div>
           </article>
         </section>
+
+        <div id="classroomTools" class="classroom-tools">
+          <div class="classroom-tools-panel">
+            <div class="classroom-tools-title">Classroom koppeling</div>
+            <button onclick="connectClassroom('amylia')">Classroom Amylia koppelen</button>
+            <button onclick="connectClassroom('alexis')">Classroom Alexis koppelen</button>
+            <button class="danger" onclick="clearImportedHomework()">Imports wissen</button>
+            <div class="classroom-tools-help">Deze knoppen zijn verborgen zodat niemand per ongeluk imports wist. Taken worden beperkt tot actuele/nog te doen Classroom-opdrachten.</div>
+          </div>
+          <button class="classroom-floating" onclick="toggleClassroomTools()">⚙️</button>
+        </div>
       </main>
     </section>
   </div>

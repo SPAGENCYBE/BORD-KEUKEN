@@ -36,3 +36,5 @@ function toggleSettings(forceOpen){const panel=document.getElementById("settings
 function runSmokeTests(){console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(typeof connectClassroom==="function","connectClassroom moet bestaan.");}
 function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
 init();
+
+function toggleClassroomTools(){const el=document.getElementById("classroomTools");if(el)el.classList.toggle("open");}
