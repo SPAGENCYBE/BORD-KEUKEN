@@ -168,6 +168,37 @@
     .general-item-title{font-size:13px;font-weight:850;line-height:1.25;}
     .general-item-meta{font-size:10px;color:var(--soft);font-weight:800;margin-top:3px;}
 
+    .homework-dashboard{width:100%;height:100%;padding:22px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:18px;backdrop-filter:blur(2px);}
+    .homework-top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;}
+    .homework-title h1{font-size:clamp(36px,4.4vw,68px);line-height:.92;font-weight:260;letter-spacing:-.065em;margin:0;text-shadow:0 18px 46px rgba(0,0,0,.38);}
+    .homework-title p{margin-top:8px;color:var(--muted);font-size:13px;font-weight:850;letter-spacing:.10em;text-transform:uppercase;}
+    .homework-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
+    .homework-actions button{border:0;border-radius:14px;min-height:40px;padding:0 14px;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.14);color:#fff;font-weight:900;}
+    .homework-actions button:first-child{background:linear-gradient(135deg,var(--purple),rgba(255,255,255,.10));}
+    .homework-actions button:nth-child(2){background:linear-gradient(135deg,var(--blue),rgba(255,255,255,.10));}
+    .homework-grid{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+    .homework-card{min-height:0;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04));border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(16px);padding:18px;overflow:hidden;}
+    .homework-card.amylia{border-top:4px solid var(--purple);}
+    .homework-card.alexis{border-top:4px solid var(--blue);}
+    .homework-person{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+    .homework-person h2{font-size:32px;font-weight:300;letter-spacing:-.05em;margin:0;}
+    .homework-count{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:950;}
+    .homework-form{display:grid;grid-template-columns:1.2fr .8fr .75fr 44px;gap:8px;margin-bottom:14px;}
+    .homework-form input{min-width:0;border:1px solid rgba(255,255,255,0.10);background:rgba(0,0,0,0.18);color:#fff;border-radius:13px;padding:10px 11px;outline:none;font-size:13px;font-weight:750;}
+    .homework-form input::placeholder{color:rgba(255,255,255,0.35);}
+    .homework-form button{border:0;border-radius:13px;background:linear-gradient(135deg,var(--blue),var(--green));color:#071019;font-weight:950;}
+    .homework-list{min-height:0;flex:1;overflow:auto;display:flex;flex-direction:column;gap:9px;scrollbar-width:none;-ms-overflow-style:none;}
+    .homework-list::-webkit-scrollbar{display:none;}
+    .homework-section{margin:9px 2px 1px;color:rgba(255,255,255,0.52);font-size:10px;text-transform:uppercase;letter-spacing:.14em;font-weight:950;}
+    .homework-item{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;background:rgba(0,0,0,0.18);border:1px solid rgba(255,255,255,0.075);border-radius:16px;padding:11px 12px;}
+    .homework-check{width:28px;height:28px;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);display:grid;place-items:center;color:var(--green);font-weight:950;}
+    .homework-main{min-width:0;}
+    .homework-task{font-size:15px;font-weight:850;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .homework-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;color:rgba(255,255,255,.55);font-size:11px;font-weight:800;}
+    .homework-delete{border:0;border-radius:10px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.66);width:28px;height:28px;font-size:18px;}
+    .homework-item.done{opacity:.52;}
+    .homework-item.done .homework-task{text-decoration:line-through;}
+
     .settings{position:fixed;right:22px;bottom:22px;z-index:40;opacity:0;transition:opacity .22s ease, transform .22s ease;transform:translateY(8px);}
     .settings:hover,.settings:focus-within{opacity:1;transform:translateY(0);}
     .floating{width:56px;height:56px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);background:rgba(0,0,0,0.38);color:#fff;font-size:23px;box-shadow:var(--shadow);backdrop-filter:blur(16px);}
@@ -197,7 +228,7 @@
       .month-grid{grid-auto-rows:92px;}
       .general-card{min-height:320px;}
       .news-strip{width:100%;max-width:100%;}
-      .news-headline{font-size:18px;}
+      .news-headline{font-size:18px;}.homework-grid{grid-template-columns:1fr;}.homework-form{grid-template-columns:1fr 1fr;}.homework-form button{min-height:38px;}.homework-top{align-items:flex-start;flex-direction:column;}.homework-actions{justify-content:flex-start;}
     }
 
     @media (max-width:780px){
@@ -213,7 +244,7 @@
       }
       .swipe-pages{height:auto;min-height:100vh;display:block;overflow:visible;}
       .page{height:auto;min-height:100vh;overflow:visible;}
-      .month-page{display:none;}
+      .month-page,.homework-page{display:none;}
       .app{min-height:100vh;height:auto;padding:14px;display:block;}
       .top,.middle,.bottom .panel:nth-child(3),.bottom .panel:nth-child(4),.weather{display:none!important;}
       .bottom{display:flex!important;flex-direction:column;gap:14px!important;min-height:0;overflow:visible;}
@@ -335,6 +366,46 @@
         </section>
       </main>
     </section>
+
+    <section class="page homework-page">
+      <main class="homework-dashboard">
+        <header class="homework-top">
+          <div class="homework-title">
+            <h1>Huiswerk & schooltaken</h1>
+            <p>Amylia en Alexis · overzicht per kind</p>
+          </div>
+          <div class="homework-actions">
+            <button onclick="connectClassroom('amylia')">Classroom Amylia</button>
+            <button onclick="connectClassroom('alexis')">Classroom Alexis</button>
+            <button onclick="clearImportedHomework()">Imports wissen</button>
+          </div>
+        </header>
+
+        <section class="homework-grid">
+          <article class="homework-card amylia">
+            <div class="homework-person"><h2>Amylia</h2><div id="amyliaHomeworkCount" class="homework-count">0 taken</div></div>
+            <div class="homework-form">
+              <input id="amyliaHomeworkTask" placeholder="Taak of huiswerk" />
+              <input id="amyliaHomeworkSubject" placeholder="Vak" />
+              <input id="amyliaHomeworkDate" type="date" />
+              <button onclick="addHomework('amylia')">+</button>
+            </div>
+            <div id="amyliaHomeworkList" class="homework-list"></div>
+          </article>
+
+          <article class="homework-card alexis">
+            <div class="homework-person"><h2>Alexis</h2><div id="alexisHomeworkCount" class="homework-count">0 taken</div></div>
+            <div class="homework-form">
+              <input id="alexisHomeworkTask" placeholder="Taak of huiswerk" />
+              <input id="alexisHomeworkSubject" placeholder="Vak" />
+              <input id="alexisHomeworkDate" type="date" />
+              <button onclick="addHomework('alexis')">+</button>
+            </div>
+            <div id="alexisHomeworkList" class="homework-list"></div>
+          </article>
+        </section>
+      </main>
+    </section>
   </div>
 
   <div id="settings" class="settings">
@@ -367,8 +438,11 @@
     const STORAGE_KEY = "keuken-dashboard-dakboard-style-v1";
     const GOOGLE_API_KEY = "AIzaSyBXqKfx3xqnu7Ppuazlr82RkVWP9ZuxGyM";
     const GOOGLE_CLIENT_ID = "939573807224-iobd60ce6q60fu3cah2dg7oad0fi7oqf.apps.googleusercontent.com";
-    const DISCOVERY_DOC = "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest";
-    const SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+    const DISCOVERY_DOCS = [
+      "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
+      "https://classroom.googleapis.com/$discovery/rest?version=v1"
+    ];
+    const SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.coursework.me.readonly";
 
     const FIREBASE_CONFIG = {
       apiKey: "AIzaSyD8ku05ZKUfi0QL3ZDn4xFg7SSenX_llmo",
@@ -403,7 +477,7 @@
     const state = loadState();
 
     function loadState(){
-      const defaults={name:"Carlos",city:"Dendermonde",googleConnected:false,calendarList:[],selectedCalendarIds:[],googleEvents:[],tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],notes:"Niet vergeten: schoolbrief tekenen · vuilnis buitenzetten",weekMenu:{ma:"Spaghetti",di:"Kip met rijst",wo:"Wraps",do:"Puree met vis",vr:"Frietjes",za:"Pizza / makkelijk",zo:"Familie-eten"}};
+      const defaults={name:"Carlos",city:"Dendermonde",googleConnected:false,calendarList:[],selectedCalendarIds:[],googleEvents:[],homework:{amylia:[],alexis:[]},tasks:[{text:"Schooltassen klaarzetten",done:false},{text:"Vuilnis buitenzetten",done:false}],shopping:[{text:"Brood",done:false},{text:"Melk",done:false},{text:"Fruit",done:false}],notes:"Niet vergeten: schoolbrief tekenen · vuilnis buitenzetten",weekMenu:{ma:"Spaghetti",di:"Kip met rijst",wo:"Wraps",do:"Puree met vis",vr:"Frietjes",za:"Pizza / makkelijk",zo:"Familie-eten"}};
       try{return {...defaults,...(JSON.parse(localStorage.getItem(STORAGE_KEY))||{})};}catch(e){return defaults;}
     }
     function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
@@ -414,11 +488,13 @@
       firebaseDb.ref("shopping").on("value",snapshot=>{const data=snapshot.val();applyingCloudUpdate=true;state.shopping=data?(Array.isArray(data)?data:Object.values(data)):[];saveState();renderList("shopping");applyingCloudUpdate=false;});
       firebaseDb.ref("tasks").on("value",snapshot=>{const data=snapshot.val();applyingCloudUpdate=true;state.tasks=data?(Array.isArray(data)?data:Object.values(data)):[];saveState();renderList("tasks");applyingCloudUpdate=false;});
       firebaseDb.ref("weekMenu").on("value",snapshot=>{const data=snapshot.val();if(data){applyingCloudUpdate=true;state.weekMenu=data;saveState();const active=document.activeElement;const isEditingMeal=active&&active.classList&&active.classList.contains("meal-input");if(!isEditingMeal)renderWeekMenu();applyingCloudUpdate=false;}else if(state.weekMenu){syncCloudWeekMenu();}});
+      firebaseDb.ref("homework").on("value",snapshot=>{const data=snapshot.val();applyingCloudUpdate=true;state.homework={amylia:data?.amylia||[],alexis:data?.alexis||[]};saveState();renderHomework();applyingCloudUpdate=false;});
     }
     function syncCloudCollection(type){if(!cloudReady||!firebaseDb||applyingCloudUpdate)return;const items=state[type]||[];const ref=firebaseDb.ref(type);const action=items.length?ref.set(items):ref.remove();action.catch(console.error);}
     function syncCloudWeekMenu(){if(!cloudReady||!firebaseDb||applyingCloudUpdate)return;firebaseDb.ref("weekMenu").set(state.weekMenu||{}).catch(console.error);}
+    function syncCloudHomework(){if(!cloudReady||!firebaseDb||applyingCloudUpdate)return;firebaseDb.ref("homework").set(state.homework||{amylia:[],alexis:[]}).catch(console.error);}
 
-    window.initializeGapiClient=async function initializeGapiClient(){if(!window.gapi)return;try{await gapi.load("client",async()=>{await gapi.client.init({apiKey:GOOGLE_API_KEY,discoveryDocs:[DISCOVERY_DOC]});gapiInited=true;maybeEnableGoogleButtons();});}catch(error){console.error(error);setStatus("Google API kon niet starten. Controleer Google Cloud: API key restrictions en Calendar API.");}};
+    window.initializeGapiClient=async function initializeGapiClient(){if(!window.gapi)return;try{await gapi.load("client",async()=>{await gapi.client.init({apiKey:GOOGLE_API_KEY,discoveryDocs:DISCOVERY_DOCS});gapiInited=true;maybeEnableGoogleButtons();});}catch(error){console.error(error);setStatus("Google API kon niet starten. Controleer Google Cloud: API key restrictions en Calendar API.");}};
     window.onGisReady=function onGisReady(){gisInited=true;maybeEnableGoogleButtons();};
     if(window.__gapiLoaded)window.initializeGapiClient();
     if(window.__gisLoaded)window.onGisReady();
@@ -434,7 +510,7 @@
     function setStatus(message){const el=document.getElementById("googleStatus");if(el)el.textContent=message;}
 
     function updateClock(){const now=new Date();document.getElementById("clock").textContent=now.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"});document.getElementById("dateText").textContent=now.toLocaleDateString("nl-BE",{weekday:"long",day:"numeric"});document.getElementById("subDateText").textContent=now.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});}
-    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();}
+    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();renderHomework();}
     function getAllEvents(){if(state.googleEvents&&state.googleEvents.length)return state.googleEvents;const today=startOfDay(new Date());return demoEvents.map(e=>({...e,dateKey:toDateKey(addDays(today,e.day))}));}
     function renderFamilyStrip(){const events=getAllEvents();const strip=document.getElementById("familyStrip");if(!strip)return;strip.innerHTML=people.map(person=>{const next=events.find(e=>String(e.title+" "+e.person).toLowerCase().includes(person.name.toLowerCase()));const text=next?`${escapeHtml(next.time)} · ${escapeHtml(next.title)}`:"Geen items";return `<div class="family-card" style="--accent:${person.color}"><div class="family-name">${escapeHtml(person.name)}</div><div class="family-next">${text}</div></div>`;}).join("");}
     function renderWeek(){const grid=document.getElementById("weekGrid");if(!grid)return;const today=startOfDay(new Date());const events=getAllEvents();grid.innerHTML=Array.from({length:14},(_,i)=>{const date=addDays(today,i);const key=toDateKey(date);const num=date.toLocaleDateString("nl-BE",{day:"2-digit"});const name=i===0?"Vandaag":date.toLocaleDateString("nl-BE",{weekday:"long"});const dayEvents=events.filter(e=>e.dateKey===key).sort((a,b)=>String(a.time).localeCompare(String(b.time)));const items=dayEvents.length?dayEvents.map(e=>`<div class="event ${e.color||"blue"}"><div class="event-time">${escapeHtml(e.time)}</div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-person">${escapeHtml(e.person||"")}</div></div>`).join(""):`<div class="empty">Geen afspraken</div>`;return `<article class="day-column"><div class="day-header"><div class="day-left"><div class="day-number">${num}</div><div class="day-name">${escapeHtml(name)}</div></div><div class="day-count">${dayEvents.length} items</div></div><div class="events">${items}</div></article>`;}).join("");}
@@ -490,13 +566,171 @@
     function handleShoppingItemClick(index){if(!state.shopping[index])return;if(state.shopping[index].done){state.shopping.splice(index,1);}else{state.shopping[index].done=true;}saveState();renderList("shopping");syncCloudCollection("shopping");}
     function getShoppingCategory(text){const t=String(text||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");const words=t.split(/[^a-z0-9]+/).filter(Boolean);const wordSet=new Set(words);const phrase=phrases=>phrases.some(p=>t.includes(p));const word=items=>items.some(item=>wordSet.has(item));if(phrase(["wc papier","toiletpapier","keukenrol","allesreiniger","vuilniszak","vuilzak","vuilzakken","afwasmiddel"])||word(["dreft","wasmiddel","verzachter","poets","spons","doekjes","vuilzak","vuilzakken"]))return"Huishouden";if(word(["kaas","hesp","ham","salami","kipfilet","kalkoen","charcuterie","prepare","americain","pate","worst","spek","boterhamworst"]))return"Charcuterie & kaas";if(phrase(["platte kaas"])||word(["melk","yoghurt","yogurt","boter","room","kaasspread","kwark","pudding","dessert","eieren","ei"]))return"Zuivel";if(word(["appel","appels","banaan","bananen","peer","peren","aardbei","aardbeien","tomaat","tomaten","sla","komkommer","wortel","wortels","ajuin","ui","uien","paprika","courgette","broccoli","bloemkool","aardappel","aardappelen","fruit","groenten","groente"]))return"Groenten & fruit";if(word(["brood","pistolet","sandwich","stokbrood","croissant","ontbijtkoek","cornflakes","granola","havermout","confituur","choco","peperkoek"]))return"Brood & ontbijt";if(word(["kip","gehakt","steak","hamburger","vlees","vis","zalm","tonijn","scampi","chipolata","spekblokjes"]))return"Vlees & vis";if(phrase(["spinazie diepvries"])||word(["diepvries","pizza","frieten","friet","ijs","erwtjes"]))return"Diepvries";if(word(["pasta","spaghetti","rijst","wraps","saus","tomatensaus","bloem","suiker","olie","azijn","zout","peper","soep","conserven","blik","puree","noedels","mie"]))return"Droge voeding";if(word(["water","cola","frisdrank","sap","koffie","thee","bier","wijn","drank","melkdrank"]))return"Dranken";if(word(["chips","koek","koeken","snoep","chocolade","nootjes","snack","wafel","wafels"]))return"Snoep & snacks";if(word(["shampoo","zeep","tandpasta","deodorant","deo","gel","scheermes","verzorging","babydoekjes","luiers"]))return"Verzorging";return"Andere";}
 
+    function renderHomework(){
+      if(!state.homework)state.homework={amylia:[],alexis:[]};
+      renderHomeworkFor("amylia");
+      renderHomeworkFor("alexis");
+    }
+
+    function renderHomeworkFor(person){
+      const list=document.getElementById(`${person}HomeworkList`);
+      const count=document.getElementById(`${person}HomeworkCount`);
+      if(!list||!count)return;
+      const items=state.homework?.[person]||[];
+      const open=items.filter(item=>!item.done).sort(sortHomework);
+      const done=items.filter(item=>item.done).sort(sortHomework);
+      count.textContent=`${open.length} open`;
+      const openHtml=open.length?`<div class="homework-section">Te doen</div>${open.map(item=>renderHomeworkItem(person,item)).join("")}`:`<div class="empty">Geen open taken</div>`;
+      const doneHtml=done.length?`<div class="homework-section">Klaar</div>${done.map(item=>renderHomeworkItem(person,item)).join("")}`:"";
+      list.innerHTML=openHtml+doneHtml;
+    }
+
+    function renderHomeworkItem(person,item){
+      const deadline=item.deadline?new Date(item.deadline+"T12:00:00").toLocaleDateString("nl-BE",{weekday:"short",day:"numeric",month:"short"}):"Geen datum";
+      return `<div class="homework-item ${item.done?"done":""}"><button class="homework-check" onclick="toggleHomework('${person}','${item.id}')">${item.done?"✓":""}</button><div class="homework-main"><div class="homework-task">${escapeHtml(item.task)}</div><div class="homework-meta"><span>${escapeHtml(item.subject||"Algemeen")}</span><span>${escapeHtml(deadline)}</span></div></div><button class="homework-delete" onclick="deleteHomework('${person}','${item.id}')">×</button></div>`;
+    }
+
+    function sortHomework(a,b){return String(a.deadline||"9999-99-99").localeCompare(String(b.deadline||"9999-99-99"))||String(a.task).localeCompare(String(b.task),"nl-BE");}
+
+    function addHomework(person){
+      if(!state.homework)state.homework={amylia:[],alexis:[]};
+      const task=document.getElementById(`${person}HomeworkTask`).value.trim();
+      const subject=document.getElementById(`${person}HomeworkSubject`).value.trim();
+      const deadline=document.getElementById(`${person}HomeworkDate`).value;
+      if(!task)return;
+      state.homework[person].push({id:`manual-${Date.now()}-${Math.random().toString(16).slice(2)}`,task,subject,deadline,done:false,source:"manual"});
+      document.getElementById(`${person}HomeworkTask`).value="";
+      document.getElementById(`${person}HomeworkSubject`).value="";
+      document.getElementById(`${person}HomeworkDate`).value="";
+      saveState();renderHomework();syncCloudHomework();
+    }
+
+    async function connectClassroom(person){
+      const ready=await waitForGoogleReady();
+      if(!ready){
+        setHomeworkImportStatus(person,"Google nog niet klaar");
+        alert("Google kon niet volledig laden. Doe Ctrl + F5 en probeer opnieuw. Controleer ook of Google Classroom API actief is.");
+        return;
+      }
+
+      tokenClient.callback=async(resp)=>{
+        if(resp.error){
+          console.error(resp);
+          alert("Classroom koppelen is mislukt. Controleer of dit account als Test user staat en Classroom toegang heeft.");
+          return;
+        }
+        await importClassroomHomework(person);
+      };
+
+      tokenClient.requestAccessToken({prompt:"select_account consent"});
+    }
+
+    async function waitForGoogleReady(timeoutMs=9000){
+      const start=Date.now();
+
+      if(window.__gapiLoaded && !gapiInited && typeof window.initializeGapiClient==="function"){
+        try{window.initializeGapiClient();}catch(e){console.warn("GAPI opnieuw starten mislukt",e);}
+      }
+      if(window.__gisLoaded && !gisInited && typeof window.onGisReady==="function"){
+        try{window.onGisReady();}catch(e){console.warn("GIS opnieuw starten mislukt",e);}
+      }
+
+      while(Date.now()-start<timeoutMs){
+        if(gapiInited&&gisInited&&tokenClient)return true;
+        maybeEnableGoogleButtons();
+        await new Promise(resolve=>setTimeout(resolve,300));
+      }
+      return false;
+    }
+
+    async function importClassroomHomework(person){
+      try{
+        setHomeworkImportStatus(person,"Classroom laden...");
+        const coursesResponse=await gapi.client.classroom.courses.list({courseStates:["ACTIVE"],pageSize:50});
+        const courses=coursesResponse.result.courses||[];
+        const imported=[];
+
+        for(const course of courses){
+          const workResponse=await gapi.client.classroom.courses.courseWork.list({courseId:course.id,pageSize:50});
+          const works=workResponse.result.courseWork||[];
+          works.forEach(work=>{
+            const dueDate=classroomDueDateToInputValue(work.dueDate);
+            const id=`classroom-${person}-${work.id}`;
+            imported.push({
+              id,
+              task:work.title||"Classroom taak",
+              subject:course.name||"Classroom",
+              deadline:dueDate,
+              done:false,
+              source:"classroom",
+              classroomCourseId:course.id,
+              classroomWorkId:work.id,
+              link:work.alternateLink||""
+            });
+          });
+        }
+
+        if(!state.homework)state.homework={amylia:[],alexis:[]};
+        const manualAndDoneImported=(state.homework[person]||[]).filter(item=>item.source!=="classroom"||item.done);
+        const doneIds=new Set(manualAndDoneImported.filter(item=>item.source==="classroom"&&item.done).map(item=>item.id));
+        const freshImported=imported.map(item=>({...item,done:doneIds.has(item.id)}));
+        state.homework[person]=mergeHomeworkById([...manualAndDoneImported,...freshImported]);
+        saveState();renderHomework();syncCloudHomework();
+        setHomeworkImportStatus(person,`${freshImported.length} Classroom-taken geladen`);
+      }catch(error){
+        console.error("Classroom import mislukt:",error);
+        alert("Classroom import is mislukt. Mogelijk blokkeert de school externe apps of heeft dit account geen Classroom-toegang.");
+        setHomeworkImportStatus(person,"Classroom import mislukt");
+      }
+    }
+
+    function mergeHomeworkById(items){
+      const map=new Map();
+      items.forEach(item=>map.set(item.id,item));
+      return [...map.values()].sort(sortHomework);
+    }
+
+    function classroomDueDateToInputValue(dueDate){
+      if(!dueDate)return"";
+      const y=String(dueDate.year).padStart(4,"0");
+      const m=String(dueDate.month).padStart(2,"0");
+      const d=String(dueDate.day).padStart(2,"0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function setHomeworkImportStatus(person,message){
+      const count=document.getElementById(`${person}HomeworkCount`);
+      if(count)count.textContent=message;
+    }
+
+    function clearImportedHomework(){
+      if(!confirm("Alle geïmporteerde Classroom-taken verwijderen? Handmatige taken blijven staan."))return;
+      if(!state.homework)state.homework={amylia:[],alexis:[]};
+      state.homework.amylia=(state.homework.amylia||[]).filter(item=>item.source!=="classroom");
+      state.homework.alexis=(state.homework.alexis||[]).filter(item=>item.source!=="classroom");
+      saveState();renderHomework();syncCloudHomework();
+    }
+
+    function toggleHomework(person,id){
+      const item=state.homework?.[person]?.find(item=>item.id===id);
+      if(!item)return;
+      item.done=!item.done;
+      saveState();renderHomework();syncCloudHomework();
+    }
+
+    function deleteHomework(person,id){
+      if(!state.homework?.[person])return;
+      state.homework[person]=state.homework[person].filter(item=>item.id!==id);
+      saveState();renderHomework();syncCloudHomework();
+    }
+
     function renderWeekMenu(){const container=document.getElementById("weekMenuList");if(!container)return;const baseDays=[["ma","Ma"],["di","Di"],["wo","Wo"],["do","Do"],["vr","Vr"],["za","Za"],["zo","Zo"]];const todayIndex=(new Date().getDay()+6)%7;const days=[...baseDays.slice(todayIndex),...baseDays.slice(0,todayIndex)];if(!state.weekMenu)state.weekMenu={};container.innerHTML=days.map(([key,label])=>`<div class="meal-row"><div class="meal-day">${label}</div><input class="meal-input" value="${escapeHtml(state.weekMenu[key]||"")}" placeholder="Menu invullen" oninput="updateMeal('${key}', this.value)" /></div>`).join("");}
     function updateMeal(day,value){if(!state.weekMenu)state.weekMenu={};state.weekMenu[day]=value;saveState();clearTimeout(weekMenuSyncTimer);weekMenuSyncTimer=setTimeout(()=>syncCloudWeekMenu(),700);}
     function addItem(type){const input=document.getElementById(type==="tasks"?"taskInput":"shoppingInput");const text=input.value.trim();if(!text)return;state[type].push({text,done:false});input.value="";saveState();renderList(type);syncCloudCollection(type);}
     function toggleItem(type,index){state[type][index].done=!state[type][index].done;saveState();renderList(type);syncCloudCollection(type);}
     function deleteItem(type,index){state[type].splice(index,1);saveState();renderList(type);syncCloudCollection(type);}
 
-    function setupInputs(){document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("tasks");});document.getElementById("shoppingInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("shopping");});const notes=document.getElementById("notes");notes.value=state.notes||"";notes.addEventListener("input",()=>{state.notes=notes.value;saveState();});}
+    function setupInputs(){document.getElementById("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("tasks");});document.getElementById("shoppingInput").addEventListener("keydown",e=>{if(e.key==="Enter")addItem("shopping");});["amylia","alexis"].forEach(person=>{const input=document.getElementById(`${person}HomeworkTask`);if(input)input.addEventListener("keydown",e=>{if(e.key==="Enter")addHomework(person);});});const notes=document.getElementById("notes");notes.value=state.notes||"";notes.addEventListener("input",()=>{state.notes=notes.value;saveState();});}
     function setupSettings(){document.getElementById("nameSetting").value=state.name;document.getElementById("citySetting").value=state.city;}
     function saveSettings(closePanel=true){state.name=document.getElementById("nameSetting").value.trim()||"Carlos";state.city=document.getElementById("citySetting").value.trim()||"Dendermonde";saveState();updateWeather();renderAll();if(closePanel)setStatus("Instellingen opgeslagen.");}
     function toggleSettings(forceOpen){const panel=document.getElementById("settings");if(forceOpen===true)panel.classList.add("open");else panel.classList.toggle("open");renderCalendarList();maybeEnableGoogleButtons();}
@@ -508,7 +742,7 @@
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 
-    function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");}
+    function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");console.assert(typeof addHomework==="function","addHomework moet bestaan voor huiswerkpagina.");console.assert(typeof waitForGoogleReady==="function","waitForGoogleReady moet bestaan voor Classroom login.");}
 
     function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
     init();
