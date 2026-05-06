@@ -168,7 +168,12 @@
         <button id="refreshCalendarButton" class="btn secondary" onclick="loadSelectedCalendarEvents()">Vernieuwen</button>
         <button id="signoutButton" class="btn danger" onclick="handleSignoutClick()">Uitloggen</button>
       </div>
-      <div class="settings-help">Voor Classroom: klik op pagina 3 op Classroom Amylia of Alexis en log in met het juiste Classroom-account.</div>
+      <div class="settings-help">Voor Classroom: log eerst in met Google. Klik daarna hieronder op Amylia of Alexis en log in met het juiste Classroom-account.</div>
+      <div class="settings-actions classroom-settings-actions">
+        <button class="btn secondary" onclick="connectClassroom('amylia')">Classroom Amylia ophalen</button>
+        <button class="btn secondary" onclick="connectClassroom('alexis')">Classroom Alexis ophalen</button>
+        <button class="btn danger" onclick="clearImportedHomework()">Classroom imports wissen</button>
+      </div>
 
       <label>Agenda's kiezen</label>
       <div id="calendarList" class="calendar-list"><div class="settings-help">Nog geen agenda's geladen.</div></div>
