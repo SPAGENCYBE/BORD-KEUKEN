@@ -606,10 +606,8 @@
     }
 
     async function connectClassroom(person){
-      const ready=await waitForGoogleReady();
-      if(!ready){
-        setHomeworkImportStatus(person,"Google nog niet klaar");
-        alert("Google kon niet volledig laden. Doe Ctrl + F5 en probeer opnieuw. Controleer ook of Google Classroom API actief is.");
+      if(!gapiInited||!gisInited||!tokenClient){
+        alert("Google is nog niet klaar. Wacht enkele seconden en probeer opnieuw.");
         return;
       }
 
@@ -623,24 +621,6 @@
       };
 
       tokenClient.requestAccessToken({prompt:"select_account consent"});
-    }
-
-    async function waitForGoogleReady(timeoutMs=9000){
-      const start=Date.now();
-
-      if(window.__gapiLoaded && !gapiInited && typeof window.initializeGapiClient==="function"){
-        try{window.initializeGapiClient();}catch(e){console.warn("GAPI opnieuw starten mislukt",e);}
-      }
-      if(window.__gisLoaded && !gisInited && typeof window.onGisReady==="function"){
-        try{window.onGisReady();}catch(e){console.warn("GIS opnieuw starten mislukt",e);}
-      }
-
-      while(Date.now()-start<timeoutMs){
-        if(gapiInited&&gisInited&&tokenClient)return true;
-        maybeEnableGoogleButtons();
-        await new Promise(resolve=>setTimeout(resolve,300));
-      }
-      return false;
     }
 
     async function importClassroomHomework(person){
@@ -742,7 +722,7 @@
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 
-    function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");console.assert(typeof addHomework==="function","addHomework moet bestaan voor huiswerkpagina.");console.assert(typeof waitForGoogleReady==="function","waitForGoogleReady moet bestaan voor Classroom login.");}
+    function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");console.assert(typeof addHomework==="function","addHomework moet bestaan voor huiswerkpagina.");}
 
     function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
     init();
