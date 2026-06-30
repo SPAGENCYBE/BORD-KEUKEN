@@ -64,8 +64,35 @@ function handleSignoutClick(){
   state.googleConnected=false;state.calendarList=[];state.selectedCalendarIds=[];state.googleEvents=[];saveState();renderAll();renderCalendarList();maybeEnableGoogleButtons();setStatus("Uitgelogd bij Google.");
 }
 
+async function ensureGoogleAccessToken(silent=true){
+  if(!state.googleConnected)return false;
+  if(!gapiInited||!gisInited||!tokenClient){
+    const ready=await waitForGoogleReady(9000);
+    if(!ready)return false;
+  }
+  if(gapi?.client?.getToken?.()?.access_token)return true;
+  return new Promise(resolve=>{
+    tokenClient.callback=(resp)=>{
+      if(resp?.error){
+        console.warn("Google token vernieuwen mislukt:",resp);
+        resolve(false);
+        return;
+      }
+      resolve(!!gapi?.client?.getToken?.()?.access_token);
+    };
+    try{
+      tokenClient.requestAccessToken({prompt:silent?"":"consent"});
+    }catch(error){
+      console.warn("Google token request mislukt:",error);
+      resolve(false);
+    }
+  });
+}
+
 async function loadCalendarList(){
   if(!state.googleConnected){handleAuthClick();return;}
+  const tokenOk=await ensureGoogleAccessToken(true);
+  if(!tokenOk){setStatus("Google opnieuw aanmelden nodig. Klik op Inloggen met Google.");return;}
   try{
     setStatus("Agenda's ophalen...");
     const response=await gapi.client.calendar.calendarList.list({minAccessRole:"reader",showHidden:false});
@@ -92,6 +119,8 @@ async function saveSelectedCalendarsAndLoad(){saveSettings(false);saveSelectedCa
 
 async function loadSelectedCalendarEvents(){
   if(!state.googleConnected)return;
+  const tokenOk=await ensureGoogleAccessToken(true);
+  if(!tokenOk){setStatus("Google opnieuw aanmelden nodig. Klik op Inloggen met Google.");return;}
   if(!state.selectedCalendarIds.length){state.googleEvents=[];saveState();renderAll();setStatus("Geen agenda geselecteerd.");return;}
   const now=new Date();const start=monthStart(now);const end=addDays(monthStart(addMonths(now,2)),1);const all=[];
   try{

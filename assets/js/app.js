@@ -1,7 +1,8 @@
 let monthViewDate = new Date();
+let lastRenderedDateKey = "";
 
 function updateClock(){const now=new Date();document.getElementById("clock").textContent=now.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"});document.getElementById("dateText").textContent=now.toLocaleDateString("nl-BE",{weekday:"long",day:"numeric"});document.getElementById("subDateText").textContent=now.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});}
-function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();renderHomework();}
+function renderAll(){lastRenderedDateKey=toDateKey(new Date());renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();renderHomework();}
 function getAllEvents(){if(state.googleEvents&&state.googleEvents.length)return state.googleEvents;const today=startOfDay(new Date());return DEMO_EVENTS.map(e=>({...e,dateKey:toDateKey(addDays(today,e.day))}));}
 function renderFamilyStrip(){const events=getAllEvents();const strip=document.getElementById("familyStrip");if(!strip)return;strip.innerHTML=PEOPLE.map(person=>{const next=events.find(e=>String(e.title+" "+e.person).toLowerCase().includes(person.name.toLowerCase()));const text=next?`${escapeHtml(next.time)} · ${escapeHtml(next.title)}`:"Geen items";return `<div class="family-card" style="--accent:${person.color}"><div class="family-name">${escapeHtml(person.name)}</div><div class="family-next">${text}</div></div>`;}).join("");}
 function renderWeek(){const grid=document.getElementById("weekGrid");if(!grid)return;const today=startOfDay(new Date());const events=getAllEvents();grid.innerHTML=Array.from({length:14},(_,i)=>{const date=addDays(today,i);const key=toDateKey(date);const num=date.toLocaleDateString("nl-BE",{day:"2-digit"});const name=i===0?"Vandaag":date.toLocaleDateString("nl-BE",{weekday:"long"});const dayEvents=events.filter(e=>e.dateKey===key).sort((a,b)=>String(a.time).localeCompare(String(b.time)));const items=dayEvents.length?dayEvents.map(e=>`<div class="event ${e.color||"blue"}"><div class="event-time">${escapeHtml(e.time)}</div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-person">${escapeHtml(e.person||"")}</div></div>`).join(""):`<div class="empty">Geen afspraken</div>`;return `<article class="day-column"><div class="day-header"><div class="day-left"><div class="day-number">${num}</div><div class="day-name">${escapeHtml(name)}</div></div><div class="day-count">${dayEvents.length} items</div></div><div class="events">${items}</div></article>`;}).join("");}
@@ -33,8 +34,20 @@ function setupInputs(){document.getElementById("taskInput").addEventListener("ke
 function setupSettings(){document.getElementById("nameSetting").value=state.name;document.getElementById("citySetting").value=state.city;}
 function saveSettings(closePanel=true){state.name=document.getElementById("nameSetting").value.trim()||"Carlos";state.city=document.getElementById("citySetting").value.trim()||"Dendermonde";saveState();updateWeather();renderAll();if(closePanel)setStatus("Instellingen opgeslagen.");}
 function toggleSettings(forceOpen){const panel=document.getElementById("settings");if(forceOpen===true)panel.classList.add("open");else panel.classList.toggle("open");renderCalendarList();maybeEnableGoogleButtons();}
+function checkDayChange(){
+  const todayKey=toDateKey(new Date());
+  if(lastRenderedDateKey && todayKey!==lastRenderedDateKey){
+    lastRenderedDateKey=todayKey;
+    monthViewDate=new Date();
+    renderAll();
+    updateWeather();
+    loadHLNNews();
+    if(state.googleConnected)loadSelectedCalendarEvents();
+  }
+}
+
 function runSmokeTests(){console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(typeof connectClassroom==="function","connectClassroom moet bestaan.");}
-function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
+function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(checkDayChange,60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDayChange();});setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},5*60*1000);}
 init();
 
 function toggleClassroomTools(){const el=document.getElementById("classroomTools");if(el)el.classList.toggle("open");}

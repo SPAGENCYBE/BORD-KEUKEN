@@ -439,8 +439,7 @@
     const GOOGLE_API_KEY = "AIzaSyBXqKfx3xqnu7Ppuazlr82RkVWP9ZuxGyM";
     const GOOGLE_CLIENT_ID = "939573807224-iobd60ce6q60fu3cah2dg7oad0fi7oqf.apps.googleusercontent.com";
     const DISCOVERY_DOCS = [
-      "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
-      "https://classroom.googleapis.com/$discovery/rest?version=v1"
+      "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"
     ];
     const SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/classroom.courses.readonly https://www.googleapis.com/auth/classroom.coursework.me.readonly";
 
@@ -466,6 +465,7 @@
     let hlnNewsItems = [];
     let hlnNewsIndex = 0;
     let hlnNewsTimer = null;
+    let lastRenderedDateKey = "";
 
     const people = [{name:"Alexis",color:"#5cc8ff"},{name:"Amylia",color:"#b47cff"},{name:"Louize",color:"#ffb24d"},{name:"Hannah",color:"#3ddc97"},{name:"Loïc",color:"#ff6b7d"}];
     const demoEvents = [{day:0,time:"07:30",title:"Werk starten",person:"Carlos",color:"blue"},{day:0,time:"18:00",title:"Samen eten",person:"Gezin",color:"orange"},{day:1,time:"17:00",title:"Turnen",person:"Amylia",color:"purple"},{day:2,time:"16:00",title:"Opvang",person:"Loïc",color:"green"},{day:4,time:"09:00",title:"Boodschappen",person:"Carlos & Steffi",color:"green"}];
@@ -510,7 +510,7 @@
     function setStatus(message){const el=document.getElementById("googleStatus");if(el)el.textContent=message;}
 
     function updateClock(){const now=new Date();document.getElementById("clock").textContent=now.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"});document.getElementById("dateText").textContent=now.toLocaleDateString("nl-BE",{weekday:"long",day:"numeric"});document.getElementById("subDateText").textContent=now.toLocaleDateString("nl-BE",{month:"long",year:"numeric"});}
-    function renderAll(){renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();renderHomework();}
+    function renderAll(){lastRenderedDateKey=toDateKey(new Date());renderFamilyStrip();renderWeek();renderList("tasks");renderList("shopping");renderWeekMenu();renderMonthCalendar();renderHomework();}
     function getAllEvents(){if(state.googleEvents&&state.googleEvents.length)return state.googleEvents;const today=startOfDay(new Date());return demoEvents.map(e=>({...e,dateKey:toDateKey(addDays(today,e.day))}));}
     function renderFamilyStrip(){const events=getAllEvents();const strip=document.getElementById("familyStrip");if(!strip)return;strip.innerHTML=people.map(person=>{const next=events.find(e=>String(e.title+" "+e.person).toLowerCase().includes(person.name.toLowerCase()));const text=next?`${escapeHtml(next.time)} · ${escapeHtml(next.title)}`:"Geen items";return `<div class="family-card" style="--accent:${person.color}"><div class="family-name">${escapeHtml(person.name)}</div><div class="family-next">${text}</div></div>`;}).join("");}
     function renderWeek(){const grid=document.getElementById("weekGrid");if(!grid)return;const today=startOfDay(new Date());const events=getAllEvents();grid.innerHTML=Array.from({length:14},(_,i)=>{const date=addDays(today,i);const key=toDateKey(date);const num=date.toLocaleDateString("nl-BE",{day:"2-digit"});const name=i===0?"Vandaag":date.toLocaleDateString("nl-BE",{weekday:"long"});const dayEvents=events.filter(e=>e.dateKey===key).sort((a,b)=>String(a.time).localeCompare(String(b.time)));const items=dayEvents.length?dayEvents.map(e=>`<div class="event ${e.color||"blue"}"><div class="event-time">${escapeHtml(e.time)}</div><div class="event-title">${escapeHtml(e.title)}</div><div class="event-person">${escapeHtml(e.person||"")}</div></div>`).join(""):`<div class="empty">Geen afspraken</div>`;return `<article class="day-column"><div class="day-header"><div class="day-left"><div class="day-number">${num}</div><div class="day-name">${escapeHtml(name)}</div></div><div class="day-count">${dayEvents.length} items</div></div><div class="events">${items}</div></article>`;}).join("");}
@@ -646,13 +646,16 @@
     async function importClassroomHomework(person){
       try{
         setHomeworkImportStatus(person,"Classroom laden...");
-        const coursesResponse=await gapi.client.classroom.courses.list({courseStates:["ACTIVE"],pageSize:50});
-        const courses=coursesResponse.result.courses||[];
+        const accessToken=gapi.client.getToken()?.access_token;
+        if(!accessToken)throw new Error("Geen Google access token beschikbaar");
+
+        const coursesData=await classroomFetch("https://classroom.googleapis.com/v1/courses?courseStates=ACTIVE&pageSize=50",accessToken);
+        const courses=coursesData.courses||[];
         const imported=[];
 
         for(const course of courses){
-          const workResponse=await gapi.client.classroom.courses.courseWork.list({courseId:course.id,pageSize:50});
-          const works=workResponse.result.courseWork||[];
+          const workData=await classroomFetch(`https://classroom.googleapis.com/v1/courses/${encodeURIComponent(course.id)}/courseWork?pageSize=50`,accessToken);
+          const works=workData.courseWork||[];
           works.forEach(work=>{
             const dueDate=classroomDueDateToInputValue(work.dueDate);
             const id=`classroom-${person}-${work.id}`;
@@ -682,6 +685,15 @@
         alert("Classroom import is mislukt. Mogelijk blokkeert de school externe apps of heeft dit account geen Classroom-toegang.");
         setHomeworkImportStatus(person,"Classroom import mislukt");
       }
+    }
+
+    async function classroomFetch(url,accessToken){
+      const res=await fetch(url,{headers:{Authorization:`Bearer ${accessToken}`}});
+      if(!res.ok){
+        const text=await res.text().catch(()=>"");
+        throw new Error(`Classroom API fout ${res.status}: ${text}`);
+      }
+      return res.json();
     }
 
     function mergeHomeworkById(items){
@@ -742,9 +754,21 @@
     function toDateKey(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
     function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 
-    function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");console.assert(typeof addHomework==="function","addHomework moet bestaan voor huiswerkpagina.");console.assert(typeof waitForGoogleReady==="function","waitForGoogleReady moet bestaan voor Classroom login.");}
+    function runSmokeTests(){console.assert(typeof window.gisLoaded==="function","gisLoaded moet globaal bestaan vóór het GIS-script laadt.");console.assert(typeof window.gapiLoaded==="function","gapiLoaded moet globaal bestaan vóór het GAPI-script laadt.");console.assert(toDateKey(new Date("2026-05-04T12:00:00"))==="2026-05-04","toDateKey moet YYYY-MM-DD teruggeven.");console.assert(weatherLabel(0)==="Zonnig","weatherLabel(0) moet Zonnig zijn.");console.assert(getWeatherTheme(0)==="sunny","Weercode 0 moet sunny theme geven.");console.assert(getWeatherTheme(61)==="rain","Weercode 61 moet rain theme geven.");console.assert(colorForTitle("Training Alexis")==="blue","Alexis events moeten blauw zijn.");console.assert(getShoppingCategory("vuilzakken")==="Huishouden","vuilzakken moet bij Huishouden staan.");console.assert(getShoppingCategory("ui")==="Groenten & fruit","ui moet bij Groenten & fruit staan.");console.assert(parseRssItems('<rss><channel><item><title>Test nieuws</title><link>https://www.hln.be/</link></item></channel></rss>').length===1,"RSS parser moet minstens 1 item vinden.");console.assert(typeof addHomework==="function","addHomework moet bestaan voor huiswerkpagina.");console.assert(typeof waitForGoogleReady==="function","waitForGoogleReady moet bestaan voor Classroom login.");console.assert(typeof classroomFetch==="function","classroomFetch moet bestaan voor Classroom REST API.");}
 
-    function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
+    function checkDayChange(){
+      const todayKey=toDateKey(new Date());
+      if(lastRenderedDateKey && todayKey!==lastRenderedDateKey){
+        lastRenderedDateKey=todayKey;
+        monthViewDate=new Date();
+        renderAll();
+        updateWeather();
+        loadHLNNews();
+        if(state.googleConnected)loadSelectedCalendarEvents();
+      }
+    }
+
+    function init(){runSmokeTests();updateClock();setupInputs();setupSettings();renderAll();renderCalendarList();loadHLNNews();applyWeatherTheme(1);updateWeather();initFirebaseSync();maybeEnableGoogleButtons();setInterval(updateClock,1000);setInterval(checkDayChange,60*1000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDayChange();});setInterval(updateWeather,15*60*1000);setInterval(loadHLNNews,30*60*1000);setInterval(()=>{if(state.googleConnected)loadSelectedCalendarEvents();},10*60*1000);}
     init();
   </script>
 </body>
