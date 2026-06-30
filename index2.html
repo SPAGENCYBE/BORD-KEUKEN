@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keuken Dashboard</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+
+  <script>
+    window.__gapiLoaded = false;
+    window.__gisLoaded = false;
+    window.gapiLoaded = function(){ window.__gapiLoaded = true; if (typeof initializeGapiClient === 'function') initializeGapiClient(); };
+    window.gisLoaded = function(){ window.__gisLoaded = true; if (typeof onGisReady === 'function') onGisReady(); };
+  </script>
+  <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-database-compat.js"></script>
+</head>
+<body>
+  <div class="swipe-pages">
+    <section class="page page-dashboard">
+      <main class="app">
+        <section class="top">
+          <div id="familyStrip" class="family-strip"></div>
+          <div class="clock-box">
+            <div id="clock" class="clock">--:--</div>
+            <div id="dateText" class="date">laden...</div>
+            <div id="subDateText" class="subdate">laden...</div>
+          </div>
+        </section>
+
+        <section class="middle">
+          <div id="weekGrid" class="week-grid"></div>
+        </section>
+
+        <section class="bottom">
+          <article class="panel shopping-panel">
+            <div class="panel-title">Boodschappen</div>
+            <div class="panel-top">
+              <input id="shoppingInput" placeholder="Voeg item toe" />
+              <button onclick="addItem('shopping')">+</button>
+            </div>
+            <div id="shoppingList" class="mini-list"></div>
+          </article>
+
+          <article class="panel weekmenu-panel">
+            <div class="panel-title">Weekmenu</div>
+            <div id="weekMenuList" class="weekmenu-list"></div>
+          </article>
+
+          <article class="panel tasks-panel">
+            <div class="panel-title">Taken</div>
+            <div class="panel-top">
+              <input id="taskInput" placeholder="Nieuwe taak" />
+              <button onclick="addItem('tasks')">+</button>
+            </div>
+            <div id="taskList" class="mini-list"></div>
+          </article>
+
+          <article class="panel notes-panel">
+            <div class="panel-title">Notities</div>
+            <textarea id="notes" class="notes" placeholder="Niet vergeten..."></textarea>
+          </article>
+
+          <aside class="weather">
+            <div>
+              <div id="weatherTemp" class="weather-temp">--°</div>
+              <div id="weatherCity" class="weather-city">Dendermonde</div>
+              <div id="weatherCondition" class="weather-condition">weer laden</div>
+            </div>
+            <div id="weatherMini" class="weather-mini"><span>laden...</span></div>
+          </aside>
+        </section>
+      </main>
+    </section>
+
+    <section class="page page-month">
+      <main class="month-dashboard">
+        <header class="month-top">
+          <div class="month-title-block">
+            <div class="news-strip">
+              <div class="news-source">HLN</div>
+              <div id="hlnHeadline" class="news-headline">Nieuws laden...</div>
+            </div>
+          </div>
+          <div class="month-nav">
+            <button onclick="changeMonth(-1)">‹</button>
+            <button id="monthLabel" onclick="goToCurrentMonth()">Maand</button>
+            <button onclick="changeMonth(1)">›</button>
+          </div>
+        </header>
+
+        <section class="month-layout">
+          <article class="month-card">
+            <div class="month-header">
+              <div class="month-weekday">Ma</div><div class="month-weekday">Di</div><div class="month-weekday">Wo</div><div class="month-weekday">Do</div><div class="month-weekday">Vr</div><div class="month-weekday">Za</div><div class="month-weekday">Zo</div>
+            </div>
+            <div id="monthGrid" class="month-grid"></div>
+          </article>
+          <aside class="general-card">
+            <div class="general-title">Komende afspraken</div>
+            <div id="monthUpcoming" class="general-list"></div>
+          </aside>
+        </section>
+      </main>
+    </section>
+
+    <section class="page page-homework">
+      <main class="homework-dashboard">
+        <header class="homework-top">
+          <div class="homework-title">
+            <h1>Huiswerk & schooltaken</h1>
+            <p>Amylia en Alexis · overzicht per kind</p>
+          </div>
+
+        </header>
+
+        <section class="homework-grid">
+          <article class="homework-card amylia">
+            <div class="homework-person"><h2>Amylia</h2><div id="amyliaHomeworkCount" class="homework-count">0 open</div></div>
+            <div class="homework-form">
+              <input id="amyliaHomeworkTask" placeholder="Taak of huiswerk" />
+              <input id="amyliaHomeworkSubject" placeholder="Vak" />
+              <input id="amyliaHomeworkDate" type="date" />
+              <button onclick="addHomework('amylia')">+</button>
+            </div>
+            <div id="amyliaHomeworkList" class="homework-list"></div>
+          </article>
+
+          <article class="homework-card alexis">
+            <div class="homework-person"><h2>Alexis</h2><div id="alexisHomeworkCount" class="homework-count">0 open</div></div>
+            <div class="homework-form">
+              <input id="alexisHomeworkTask" placeholder="Taak of huiswerk" />
+              <input id="alexisHomeworkSubject" placeholder="Vak" />
+              <input id="alexisHomeworkDate" type="date" />
+              <button onclick="addHomework('alexis')">+</button>
+            </div>
+            <div id="alexisHomeworkList" class="homework-list"></div>
+          </article>
+        </section>
+
+        <div id="classroomTools" class="classroom-tools">
+          <div class="classroom-tools-panel">
+            <div class="classroom-tools-title">Classroom koppeling</div>
+            <button onclick="connectClassroom('amylia')">Classroom Amylia koppelen</button>
+            <button onclick="connectClassroom('alexis')">Classroom Alexis koppelen</button>
+            <button class="danger" onclick="clearImportedHomework()">Imports wissen</button>
+            <div class="classroom-tools-help">Deze knoppen zijn verborgen zodat niemand per ongeluk imports wist. Taken worden beperkt tot actuele/nog te doen Classroom-opdrachten.</div>
+          </div>
+          <div class="classroom-hitbox" aria-hidden="true"></div>
+          <button class="classroom-floating" onclick="toggleClassroomTools()">⚙️</button>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <div id="settings" class="settings">
+    <div class="settings-panel">
+      <label>Basis</label>
+      <input id="nameSetting" placeholder="Naam, bv. Carlos" />
+      <input id="citySetting" placeholder="Stad voor weer, bv. Dendermonde" />
+
+      <label>Google Agenda / Classroom</label>
+      <div id="googleStatus" class="status">Google wordt geladen...</div>
+      <div class="settings-actions">
+        <button id="authorizeButton" class="btn" onclick="handleAuthClick()">Inloggen met Google</button>
+        <button id="loadCalendarsButton" class="btn secondary" onclick="loadCalendarList()">Agenda's ophalen</button>
+        <button id="refreshCalendarButton" class="btn secondary" onclick="loadSelectedCalendarEvents()">Vernieuwen</button>
+        <button id="signoutButton" class="btn danger" onclick="handleSignoutClick()">Uitloggen</button>
+      </div>
+      <div class="settings-help">Voor Classroom: log eerst in met Google. Klik daarna hieronder op Amylia of Alexis en log in met het juiste Classroom-account.</div>
+      <div class="settings-actions classroom-settings-actions">
+        <button class="btn secondary" onclick="connectClassroom('amylia')">Classroom Amylia ophalen</button>
+        <button class="btn secondary" onclick="connectClassroom('alexis')">Classroom Alexis ophalen</button>
+        <button class="btn danger" onclick="clearImportedHomework()">Classroom imports wissen</button>
+      </div>
+
+      <label>Agenda's kiezen</label>
+      <div id="calendarList" class="calendar-list"><div class="settings-help">Nog geen agenda's geladen.</div></div>
+
+      <div class="settings-actions">
+        <button class="btn" onclick="saveSettings()">Opslaan</button>
+        <button class="btn secondary" onclick="saveSelectedCalendarsAndLoad()">Gekozen agenda's opslaan</button>
+      </div>
+    </div>
+    <div class="settings-hitbox" aria-hidden="true"></div>
+    <button class="floating" onclick="toggleSettings()">⚙️</button>
+  </div>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/helpers.js"></script>
+  <script src="assets/js/state.js"></script>
+  <script src="assets/js/firebase-sync.js"></script>
+  <script src="assets/js/google-calendar.js"></script>
+  <script src="assets/js/google-classroom.js"></script>
+  <script src="assets/js/weather-news.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
