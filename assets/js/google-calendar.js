@@ -91,16 +91,32 @@ async function ensureGoogleAccessToken(silent=true){
 
 async function loadCalendarList(){
   if(!state.googleConnected){handleAuthClick();return;}
-  const tokenOk=await ensureGoogleAccessToken(true);
+  const tokenOk=await ensureGoogleAccessToken(false);
   if(!tokenOk){setStatus("Google opnieuw aanmelden nodig. Klik op Inloggen met Google.");return;}
   try{
     setStatus("Agenda's ophalen...");
     const response=await gapi.client.calendar.calendarList.list({minAccessRole:"reader",showHidden:false});
     const calendars=response.result.items||[];
     state.calendarList=calendars.map(cal=>({id:cal.id,summary:cal.summaryOverride||cal.summary||cal.id,primary:!!cal.primary,backgroundColor:cal.backgroundColor||"#5cc8ff"}));
-    if(!state.selectedCalendarIds.length){const primary=state.calendarList.find(c=>c.primary);state.selectedCalendarIds=primary?[primary.id]:state.calendarList.slice(0,1).map(c=>c.id);}
-    saveState();renderCalendarList();await loadSelectedCalendarEvents();setStatus(`${state.calendarList.length} agenda's gevonden.`);
-  }catch(error){console.error(error);setStatus("Agenda's ophalen is tijdelijk mislukt. Probeer straks opnieuw.");}
+    if(!state.selectedCalendarIds.length){
+      const primary=state.calendarList.find(c=>c.primary);
+      state.selectedCalendarIds=primary?[primary.id]:state.calendarList.slice(0,1).map(c=>c.id);
+    }
+    saveState();
+    renderCalendarList();
+    await loadSelectedCalendarEvents();
+    setStatus(`${state.calendarList.length} agenda's gevonden.`);
+  }catch(error){
+    console.error("Agenda's ophalen mislukt:",error);
+    const message=getGoogleErrorMessage(error);
+    if(state.calendarList?.length){
+      renderCalendarList();
+      setStatus(`Agenda's ophalen mislukt (${message}). Bestaande agenda's blijven zichtbaar.`);
+      await loadSelectedCalendarEvents();
+    }else{
+      setStatus(`Agenda's ophalen mislukt: ${message}. Log opnieuw in of controleer Google Cloud.`);
+    }
+  }
 }
 
 function renderCalendarList(){
@@ -122,16 +138,66 @@ async function loadSelectedCalendarEvents(){
   const tokenOk=await ensureGoogleAccessToken(true);
   if(!tokenOk){setStatus("Google opnieuw aanmelden nodig. Klik op Inloggen met Google.");return;}
   if(!state.selectedCalendarIds.length){state.googleEvents=[];saveState();renderAll();setStatus("Geen agenda geselecteerd.");return;}
-  const now=new Date();const start=monthStart(now);const end=addDays(monthStart(addMonths(now,2)),1);const all=[];
-  try{
-    setStatus("Afspraken laden...");
-    for(const calendarId of state.selectedCalendarIds){
-      const calendarMeta=state.calendarList.find(c=>c.id===calendarId);
-      const response=await gapi.client.calendar.events.list({calendarId,timeMin:start.toISOString(),timeMax:end.toISOString(),showDeleted:false,singleEvents:true,maxResults:120,orderBy:"startTime"});
+
+  const now=new Date();
+  const start=monthStart(now);
+  const end=addDays(monthStart(addMonths(now,2)),1);
+  const all=[];
+  const failed=[];
+
+  setStatus("Afspraken laden...");
+
+  for(const calendarId of state.selectedCalendarIds){
+    const calendarMeta=state.calendarList.find(c=>c.id===calendarId);
+    try{
+      const response=await gapi.client.calendar.events.list({
+        calendarId,
+        timeMin:start.toISOString(),
+        timeMax:end.toISOString(),
+        showDeleted:false,
+        singleEvents:true,
+        maxResults:120,
+        orderBy:"startTime"
+      });
       const events=response.result.items||[];
-      all.push(...events.map(event=>{const startValue=event.start.dateTime||event.start.date;const isAllDay=!event.start.dateTime;const date=new Date(startValue);return{dateKey:toDateKey(date),time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),title:event.summary||"Geen titel",person:calendarMeta?.summary||"Google Calendar",color:colorForTitle(`${event.summary||""} ${calendarMeta?.summary||""}`),google:true};}));
+      all.push(...events.map(event=>{
+        const startValue=event.start.dateTime||event.start.date;
+        const isAllDay=!event.start.dateTime;
+        const date=new Date(startValue);
+        return{
+          dateKey:toDateKey(date),
+          time:isAllDay?"Hele dag":date.toLocaleTimeString("nl-BE",{hour:"2-digit",minute:"2-digit"}),
+          title:event.summary||"Geen titel",
+          person:calendarMeta?.summary||"Google Calendar",
+          color:colorForTitle(`${event.summary||""} ${calendarMeta?.summary||""}`),
+          google:true
+        };
+      }));
+    }catch(error){
+      console.warn("Agenda overgeslagen:",calendarId,error);
+      failed.push(calendarMeta?.summary||calendarId);
     }
-    state.googleEvents=all;saveState();renderAll();setStatus(`${all.length} afspraken geladen.`);
-  }catch(error){console.error(error);setStatus("Agenda tijdelijk niet vernieuwd. Bestaande afspraken blijven zichtbaar.");}
+  }
+
+  if(all.length || failed.length<state.selectedCalendarIds.length){
+    state.googleEvents=all;
+    saveState();
+    renderAll();
+  }
+
+  if(failed.length){
+    setStatus(`${all.length} afspraken geladen. ${failed.length} agenda niet bereikbaar.`);
+  }else{
+    setStatus(`${all.length} afspraken geladen.`);
+  }
+}
+
+function getGoogleErrorMessage(error){
+  const status=error?.status || error?.result?.error?.code || error?.code || "";
+  const msg=error?.result?.error?.message || error?.message || "onbekende fout";
+  if(String(status)==="401")return "sessie verlopen";
+  if(String(status)==="403")return "geen toegang of API key restrictie";
+  if(String(status)==="404")return "agenda niet gevonden";
+  return status?`${status} ${msg}`:msg;
 }
 function setStatus(message){const el=document.getElementById("googleStatus");if(el)el.textContent=message;}
